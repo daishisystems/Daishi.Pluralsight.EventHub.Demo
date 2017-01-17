@@ -1,0 +1,9 @@
+C:\Users\mooneyp\Documents\GitHub\Daishi.Pluralsight.EventHub\Daishi.Pluralsight.EventHub\bin\Debug\Daishi.Pluralsight.EventHub.dll
+C:\Users\mooneyp\Documents\GitHub\Daishi.Pluralsight.EventHub\Daishi.Pluralsight.EventHub\bin\Debug\Daishi.Pluralsight.EventHub.pdb
+C:\Users\mooneyp\Documents\GitHub\Daishi.Pluralsight.EventHub\Daishi.Pluralsight.EventHub\bin\Debug\Microsoft.ServiceBus.dll
+C:\Users\mooneyp\Documents\GitHub\Daishi.Pluralsight.EventHub\Daishi.Pluralsight.EventHub\bin\Debug\Microsoft.ServiceBus.xml
+C:\Users\mooneyp\Documents\GitHub\Daishi.Pluralsight.EventHub\Daishi.Pluralsight.EventHub\obj\Debug\Daishi.Pluralsight.EventHub.csprojResolveAssemblyReference.cache
+C:\Users\mooneyp\Documents\GitHub\Daishi.Pluralsight.EventHub\Daishi.Pluralsight.EventHub\obj\Debug\Daishi.Pluralsight.EventHub.ErrorMessageResources.resources
+C:\Users\mooneyp\Documents\GitHub\Daishi.Pluralsight.EventHub\Daishi.Pluralsight.EventHub\obj\Debug\Daishi.Pluralsight.EventHub.csproj.GenerateResource.Cache
+C:\Users\mooneyp\Documents\GitHub\Daishi.Pluralsight.EventHub\Daishi.Pluralsight.EventHub\obj\Debug\Daishi.Pluralsight.EventHub.dll
+C:\Users\mooneyp\Documents\GitHub\Daishi.Pluralsight.EventHub\Daishi.Pluralsight.EventHub\obj\Debug\Daishi.Pluralsight.EventHub.pdb
