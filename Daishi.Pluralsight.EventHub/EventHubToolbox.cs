@@ -81,7 +81,7 @@ namespace Daishi.Pluralsight.EventHub
         ///     <see cref="EventHubToolboxException" /> is thrown when
         ///     <see cref="message" /> cannot be published to an Event Hub instance.
         /// </exception>
-        public void Send(
+        public static void Send(
             string message,
             EventHubClient eventHubClient)
         {
@@ -136,7 +136,7 @@ namespace Daishi.Pluralsight.EventHub
         ///     <see cref="EventHubToolboxException" /> is thrown when
         ///     <see cref="message" /> cannot be published to an Event Hub instance.
         /// </exception>
-        public async void SendAsync(
+        public static async void SendAsync(
             string message,
             EventHubClient eventHubClient)
         {

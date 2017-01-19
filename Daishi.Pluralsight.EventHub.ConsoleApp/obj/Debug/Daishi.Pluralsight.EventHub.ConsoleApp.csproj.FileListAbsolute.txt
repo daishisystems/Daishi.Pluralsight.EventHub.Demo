@@ -1,0 +1,10 @@
+C:\Users\mooneyp\Documents\GitHub\Daishi.Pluralsight.EventHub\Daishi.Pluralsight.EventHub.ConsoleApp\bin\Debug\Daishi.Pluralsight.EventHub.ConsoleApp.exe.config
+C:\Users\mooneyp\Documents\GitHub\Daishi.Pluralsight.EventHub\Daishi.Pluralsight.EventHub.ConsoleApp\bin\Debug\Daishi.Pluralsight.EventHub.ConsoleApp.exe
+C:\Users\mooneyp\Documents\GitHub\Daishi.Pluralsight.EventHub\Daishi.Pluralsight.EventHub.ConsoleApp\bin\Debug\Daishi.Pluralsight.EventHub.ConsoleApp.pdb
+C:\Users\mooneyp\Documents\GitHub\Daishi.Pluralsight.EventHub\Daishi.Pluralsight.EventHub.ConsoleApp\bin\Debug\Daishi.Pluralsight.EventHub.dll
+C:\Users\mooneyp\Documents\GitHub\Daishi.Pluralsight.EventHub\Daishi.Pluralsight.EventHub.ConsoleApp\bin\Debug\Microsoft.ServiceBus.dll
+C:\Users\mooneyp\Documents\GitHub\Daishi.Pluralsight.EventHub\Daishi.Pluralsight.EventHub.ConsoleApp\bin\Debug\Daishi.Pluralsight.EventHub.pdb
+C:\Users\mooneyp\Documents\GitHub\Daishi.Pluralsight.EventHub\Daishi.Pluralsight.EventHub.ConsoleApp\bin\Debug\Microsoft.ServiceBus.xml
+C:\Users\mooneyp\Documents\GitHub\Daishi.Pluralsight.EventHub\Daishi.Pluralsight.EventHub.ConsoleApp\obj\Debug\Daishi.Pluralsight.EventHub.ConsoleApp.csprojResolveAssemblyReference.cache
+C:\Users\mooneyp\Documents\GitHub\Daishi.Pluralsight.EventHub\Daishi.Pluralsight.EventHub.ConsoleApp\obj\Debug\Daishi.Pluralsight.EventHub.ConsoleApp.exe
+C:\Users\mooneyp\Documents\GitHub\Daishi.Pluralsight.EventHub\Daishi.Pluralsight.EventHub.ConsoleApp\obj\Debug\Daishi.Pluralsight.EventHub.ConsoleApp.pdb
