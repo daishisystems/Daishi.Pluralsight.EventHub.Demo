@@ -40,7 +40,7 @@ namespace Daishi.Pluralsight.EventHub
         ///     <see cref="reason" /> outlines the reason for
         ///     un-subscription.
         /// </param>
-        /// <returns><see cref="Task{TResult}" />(an empty async response).</returns>
+        /// <returns><see cref="Task{TResult}" /> (an empty async response).</returns>
         async Task IEventProcessor.CloseAsync(
             PartitionContext context,
             CloseReason reason)
@@ -58,10 +58,14 @@ namespace Daishi.Pluralsight.EventHub
         }
 
         /// <summary>
-        /// todo: Start here.
+        ///     <see cref="IEventProcessor.OpenAsync" /> is invoked upon connecting to an
+        ///     Event Hub partition.
         /// </summary>
-        /// <param name="context"></param>
-        /// <returns></returns>
+        /// <param name="context">
+        ///     <see cref="context" /> is the
+        ///     <see cref="PartitionContext" /> to which this instance will subscribe.
+        /// </param>
+        /// <returns><see cref="Task{TResult}" /> (an empty async response).</returns>
         Task IEventProcessor.OpenAsync(PartitionContext context)
         {
             _checkpointStopWatch = new Stopwatch();
@@ -76,6 +80,25 @@ namespace Daishi.Pluralsight.EventHub
             return Task.FromResult<object>(null);
         }
 
+        /// <summary>
+        ///     <see cref="IEventProcessor.ProcessEventsAsync" /> is invoked when an event,
+        ///     or collection of events, is retrieved from the Event Hub partition(s) to
+        ///     which this instance is subscribed.
+        /// </summary>
+        /// <param name="context">
+        ///     <see cref="context" /> is the
+        ///     <see cref="PartitionContext" /> to which this instance is subscribed.
+        /// </param>
+        /// <param name="messages">
+        ///     <see cref="messages" /> is a collection of
+        ///     <see cref="EventData" /> instances retrieved from the Event Hub
+        ///     partition(s) to which this instance is subscribed.
+        /// </param>
+        /// <returns><see cref="Task{TResult}" /> (an empty async response).</returns>
+        /// <remarks>
+        ///     <see cref="IEventProcessor.ProcessEventsAsync" /> raises
+        ///     <see cref="Notification" /> and <see cref="MessageReceived" /> events.
+        /// </remarks>
         async Task IEventProcessor.ProcessEventsAsync(PartitionContext context,
             IEnumerable<EventData> messages)
         {
@@ -100,14 +123,41 @@ namespace Daishi.Pluralsight.EventHub
             }
         }
 
+        /// <summary>
+        ///     <see cref="Notification" /> is raised when an event is downloaded from an
+        ///     Event Hub partition. This is a notification mechanism only, and does not
+        ///     contain information pertaining to the event itself.
+        /// </summary>
         public event EventHandler Notification;
+
+        /// <summary>
+        ///     <see cref="MessageReceived" /> is raised when an event is downloaded from
+        ///     an Event Hub partition, and contains the event itself in serialised,
+        ///     UTF-8-format.
+        /// </summary>
         public event EventHandler MessageReceived;
 
+        /// <summary>
+        ///     <see cref="OnNotification" /> invokes any subscribers to
+        ///     <see cref="Notification" />.
+        /// </summary>
+        /// <param name="e">
+        ///     <see cref="e" /> is an <see cref="EventReceiverEventArgs" />
+        ///     instance containing a notification message.
+        /// </param>
         protected virtual void OnNotification(EventReceiverEventArgs e)
         {
             Notification?.Invoke(this, e);
         }
 
+        /// <summary>
+        ///     <see cref="OnMessageReceived" /> invokes any subscribers to
+        ///     <see cref="MessageReceived" />.
+        /// </summary>
+        /// <param name="e">
+        ///     <see cref="e" /> is an <see cref="EventReceiverEventArgs" />
+        ///     instance containing the event itself in serialised, UTF-8-format.
+        /// </param>
         protected virtual void OnMessageReceived(EventReceiverEventArgs e)
         {
             MessageReceived?.Invoke(this, e);

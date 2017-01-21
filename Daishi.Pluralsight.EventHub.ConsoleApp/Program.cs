@@ -22,6 +22,7 @@ namespace Daishi.Pluralsight.EventHub.ConsoleApp
                 Console.WriteLine(@"Connected OK!");
             }
             Console.ReadLine();
+            eventHubClient.Close();
         }
     }
 }
