@@ -87,6 +87,7 @@
     <Compile Include="EventHubToolboxException.cs" />
     <Compile Include="EventReceiver.cs" />
     <Compile Include="EventReceiverEventArgs.cs" />
+    <Compile Include="BridgeEventProcessorFactory.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>
   <ItemGroup>

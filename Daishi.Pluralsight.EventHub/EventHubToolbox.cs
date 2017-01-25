@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Text;
+using System.Threading.Tasks;
 using Microsoft.ServiceBus.Messaging;
 
 namespace Daishi.Pluralsight.EventHub
@@ -10,6 +11,23 @@ namespace Daishi.Pluralsight.EventHub
     /// </summary>
     public class EventHubToolbox
     {
+        private static readonly Lazy<EventHubToolbox> Lazy =
+            new Lazy<EventHubToolbox>(() => new EventHubToolbox());
+
+        private EventProcessorHost _eventProcessorHost;
+
+        private EventHubToolbox()
+        {
+        }
+
+        public static EventHubToolbox Instance => Lazy.Value;
+
+        public bool IsSubscribed
+        {
+            get;
+            private set;
+        }
+
         /// <summary>
         ///     <see cref="Connect" /> establishes a connection to an Event Hub instance
         ///     specified by <see cref="connectionString" />.
@@ -136,7 +154,8 @@ namespace Daishi.Pluralsight.EventHub
         ///     <see cref="EventHubToolboxException" /> is thrown when
         ///     <see cref="message" /> cannot be published to an Event Hub instance.
         /// </exception>
-        public static async void SendAsync(
+        /// <returns><see cref="Task{TResult}" /> (an empty async response).</returns>
+        public static async Task SendAsync(
             string message,
             EventHubClient eventHubClient)
         {
@@ -160,6 +179,203 @@ namespace Daishi.Pluralsight.EventHub
                 throw new EventHubToolboxException(
                     ErrorMessageResources.UnableToSendMessage,
                     exception);
+            }
+        }
+
+        /// <summary>
+        ///     <see cref="Subscribe" /> acquires a lease on an Event Hub partition, and
+        ///     reads events from the Event Hub as they are published.
+        /// </summary>
+        /// <param name="storageConnectionString">
+        ///     <see cref="storageConnectionString" /> is
+        ///     the Azure Storage connection-string, used to store events as they are
+        ///     removed from the Event hub.
+        /// </param>
+        /// <param name="eventHubConnectionString">
+        ///     <see cref="eventHubConnectionString" />
+        ///     is the connection-string to the Event Hub.
+        /// </param>
+        /// <param name="eventHubName">
+        ///     <see cref="eventHubName" /> is the name of the Event
+        ///     Hub.
+        /// </param>
+        /// <param name="eventProcessor">
+        ///     <see cref="eventProcessor" /> is the
+        ///     <see cref="IEventProcessor" /> instance that interfaces with the Event Hub
+        ///     partition.
+        /// </param>
+        /// <param name="eventProcessorOptions">
+        ///     <see cref="EventProcessorOptions" /> allows
+        ///     custom <see cref="Exception" />-handling, among other things, when
+        ///     interfacing with the Event hub partition.
+        /// </param>
+        public void Subscribe(
+            string storageConnectionString,
+            string eventHubConnectionString,
+            string eventHubName,
+            IEventProcessor eventProcessor,
+            EventProcessorOptions eventProcessorOptions = null)
+        {
+            if (string.IsNullOrEmpty(storageConnectionString))
+            {
+                throw new ArgumentNullException(nameof(storageConnectionString));
+            }
+            if (string.IsNullOrEmpty(eventHubConnectionString))
+            {
+                throw new ArgumentNullException(nameof(eventHubConnectionString));
+            }
+            if (string.IsNullOrEmpty(eventHubName))
+            {
+                throw new ArgumentNullException(nameof(eventHubName));
+            }
+            if (eventProcessor == null)
+            {
+                throw new ArgumentNullException(nameof(eventProcessor));
+            }
+            if (IsSubscribed)
+            {
+                _eventProcessorHost?.UnregisterEventProcessorAsync().Wait();
+            }
+
+            _eventProcessorHost = new EventProcessorHost(
+                Guid.NewGuid().ToString(),
+                eventHubName,
+                EventHubConsumerGroup.DefaultGroupName,
+                eventHubConnectionString,
+                storageConnectionString);
+
+            var factory = new BridgeEventProcessorFactory(eventProcessor);
+
+            if (eventProcessorOptions == null)
+            {
+                _eventProcessorHost
+                    .RegisterEventProcessorFactoryAsync(factory)
+                    .Wait();
+            }
+            else
+            {
+                _eventProcessorHost
+                    .RegisterEventProcessorFactoryAsync(
+                        factory,
+                        eventProcessorOptions)
+                    .Wait();
+            }
+            IsSubscribed = true;
+        }
+
+        /// <summary>
+        ///     <see cref="SubscribeAsync" /> asynchronously acquires a lease on an Event
+        ///     Hub partition, and reads events from the Event Hub as they are published.
+        /// </summary>
+        /// <param name="eventHubConnectionString">
+        ///     <see cref="eventHubConnectionString" /> is the connection-string to the
+        ///     Event Hub.
+        /// </param>
+        /// <param name="eventHubName">
+        ///     <see cref="eventHubName" /> is the name of the Event Hub.
+        /// </param>
+        /// <param name="storageAccountName">
+        ///     <see cref="storageAccountName" /> is the name assigned to the Azure storage
+        ///     account used to store events as they are removed from the Event hub.
+        /// </param>
+        /// <param name="storageAccountKey">
+        ///     <see cref="storageAccountKey" /> is the access key assigned to the Azure
+        ///     storage account used to store events as they are removed from the Event
+        ///     hub.
+        /// </param>
+        /// <param name="eventProcessor">
+        ///     <see cref="eventProcessor" /> is the
+        ///     <see cref="IEventProcessor" /> instance that interfaces with the Event Hub
+        ///     partition.
+        /// </param>
+        /// <param name="eventProcessorOptions">
+        ///     <see cref="EventProcessorOptions" /> allows custom <see cref="Exception" />
+        ///     -handling, among other things, when interfacing with the Event hub
+        ///     partition.
+        /// </param>
+        /// <returns><see cref="Task{TResult}" /> (an empty async response).</returns>
+        public async Task SubscribeAsync(
+            string eventHubConnectionString,
+            string eventHubName,
+            string storageAccountName,
+            string storageAccountKey,
+            IEventProcessor eventProcessor,
+            EventProcessorOptions eventProcessorOptions = null)
+        {
+            if (string.IsNullOrEmpty(eventHubConnectionString))
+            {
+                throw new ArgumentNullException(nameof(eventHubConnectionString));
+            }
+            if (string.IsNullOrEmpty(eventHubName))
+            {
+                throw new ArgumentNullException(nameof(eventHubName));
+            }
+            if (string.IsNullOrEmpty(storageAccountName))
+            {
+                throw new ArgumentNullException(nameof(storageAccountName));
+            }
+            if (string.IsNullOrEmpty(storageAccountKey))
+            {
+                throw new ArgumentNullException(nameof(storageAccountKey));
+            }
+            if (eventProcessor == null)
+            {
+                throw new ArgumentNullException(nameof(eventProcessor));
+            }
+            if (IsSubscribed)
+            {
+                _eventProcessorHost?.UnregisterEventProcessorAsync().Wait();
+            }
+
+            var storageConnectionString =
+                $"DefaultEndpointsProtocol=https;AccountName={storageAccountName}" +
+                $";AccountKey={storageAccountKey}";
+
+            _eventProcessorHost = new EventProcessorHost(
+                Guid.NewGuid().ToString(),
+                eventHubName,
+                EventHubConsumerGroup.DefaultGroupName,
+                eventHubConnectionString,
+                storageConnectionString);
+
+            var factory = new BridgeEventProcessorFactory(eventProcessor);
+
+            if (eventProcessorOptions == null)
+            {
+                await _eventProcessorHost
+                    .RegisterEventProcessorFactoryAsync(factory);
+            }
+            else
+            {
+                await _eventProcessorHost
+                    .RegisterEventProcessorFactoryAsync(
+                        factory,
+                        eventProcessorOptions);
+            }
+            IsSubscribed = true;
+        }
+
+        /// <summary>
+        ///     <see cref="Unsubscribe" /> resets the lease on the currently subscribed-to
+        ///     Event Hub partition, if applicable.
+        /// </summary>
+        public void Unsubscribe()
+        {
+            if (IsSubscribed)
+            {
+                _eventProcessorHost?.UnregisterEventProcessorAsync().Wait();
+            }
+        }
+
+        /// <summary>
+        ///     <see cref="UnsubscribeAsync" /> asynchronously resets the lease on the
+        ///     currently subscribed-to Event Hub partition, if applicable.
+        /// </summary>
+        public async Task UnsubscribeAsync()
+        {
+            if (IsSubscribed && _eventProcessorHost != null)
+            {
+                await _eventProcessorHost.UnregisterEventProcessorAsync();
             }
         }
     }
