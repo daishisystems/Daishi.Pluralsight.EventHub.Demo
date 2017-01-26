@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.Text;
 using System.Threading.Tasks;
 using Microsoft.ServiceBus.Messaging;
@@ -14,19 +15,20 @@ namespace Daishi.Pluralsight.EventHub
         private static readonly Lazy<EventHubToolbox> Lazy =
             new Lazy<EventHubToolbox>(() => new EventHubToolbox());
 
-        private EventProcessorHost _eventProcessorHost;
+        private readonly Dictionary<string, EventProcessorHost> _eventProcessorHosts;
+
+        private EventHubClient _eventHubClient;
 
         private EventHubToolbox()
         {
+            _eventProcessorHosts = new Dictionary<string, EventProcessorHost>();
         }
 
         public static EventHubToolbox Instance => Lazy.Value;
 
-        public bool IsSubscribed
-        {
-            get;
-            private set;
-        }
+        public bool IsSubscribedToAny => _eventProcessorHosts.Count > 0;
+
+        public bool IsConnected => _eventHubClient != null && !_eventHubClient.IsClosed;
 
         /// <summary>
         ///     <see cref="Connect" /> establishes a connection to an Event Hub instance
@@ -35,11 +37,6 @@ namespace Daishi.Pluralsight.EventHub
         /// <param name="connectionString">
         ///     <see cref="connectionString" /> is the Event Hub
         ///     connection-string.
-        /// </param>
-        /// <param name="eventHubClient">
-        ///     <see cref="eventHubClient" /> is an instance of
-        ///     <see cref="EventHubClient" /> that retains a connection to an Event Hub
-        ///     instance.
         /// </param>
         /// <returns><c>true</c>, on successful connection. Otherwise, <c>false</c>.</returns>
         /// <exception cref="ArgumentNullException">
@@ -50,9 +47,7 @@ namespace Daishi.Pluralsight.EventHub
         ///     <see cref="EventHubToolboxException" /> is thrown when a connection to
         ///     an Event Hub instance cannot be established.
         /// </exception>
-        public static bool Connect(
-            string connectionString,
-            out EventHubClient eventHubClient)
+        public void Connect(string connectionString)
         {
             if (string.IsNullOrEmpty(connectionString))
             {
@@ -60,9 +55,8 @@ namespace Daishi.Pluralsight.EventHub
             }
             try
             {
-                eventHubClient = EventHubClient.CreateFromConnectionString(
+                _eventHubClient = EventHubClient.CreateFromConnectionString(
                     connectionString);
-                return !eventHubClient.IsClosed;
             }
             catch (Exception exception)
             {
@@ -73,49 +67,39 @@ namespace Daishi.Pluralsight.EventHub
         }
 
         /// <summary>
-        ///     <see cref="Send" /> publishes <see cref="message" /> to an Event Hub
-        ///     instance managed by <see cref="eventHubClient" />.
+        ///     <see cref="Send" /> publishes <see cref="message" /> to an Event Hub.
         /// </summary>
         /// <param name="message">
-        ///     <see cref="message" /> is the message that will be
-        ///     published to an Event Hub instance managed by <see cref="eventHubClient" />
-        ///     .
-        /// </param>
-        /// <param name="eventHubClient">
-        ///     <see cref="eventHubClient" /> is an instance of
-        ///     <see cref="EventHubClient" /> that retains a connection to an Event Hub
-        ///     instance.
+        ///     <see cref="message" /> is the message that will be published to an Event
+        ///     Hub.
         /// </param>
         /// <exception cref="ArgumentNullException">
         ///     <see cref="ArgumentNullException" /> is
         ///     thrown when <see cref="message" /> is invalid.
         /// </exception>
         /// <exception cref="ArgumentException">
-        ///     <see cref="ArgumentException" /> is thrown
-        ///     when <see cref="eventHubClient" /> does not retain a valid connection to
-        ///     Event Hub.
+        ///     <see cref="ArgumentException" /> is thrown when no valid connection to
+        ///     Event Hub exists.
         /// </exception>
         /// <exception cref="EventHubToolboxException">
         ///     <see cref="EventHubToolboxException" /> is thrown when
         ///     <see cref="message" /> cannot be published to an Event Hub instance.
         /// </exception>
-        public static void Send(
-            string message,
-            EventHubClient eventHubClient)
+        public void Send(string message)
         {
             if (string.IsNullOrEmpty(message))
             {
                 throw new ArgumentNullException(nameof(message));
             }
-            if (eventHubClient == null || eventHubClient.IsClosed)
+            if (_eventHubClient == null || _eventHubClient.IsClosed)
             {
                 throw new ArgumentException(
                     ErrorMessageResources.Uninitialized,
-                    nameof(eventHubClient));
+                    nameof(_eventHubClient));
             }
             try
             {
-                eventHubClient.Send(
+                _eventHubClient.Send(
                     new EventData(Encoding.UTF8.GetBytes(message)));
             }
             catch (Exception exception)
@@ -127,51 +111,40 @@ namespace Daishi.Pluralsight.EventHub
         }
 
         /// <summary>
-        ///     <see cref="SendAsync" /> asynchronously publishes <see cref="message" /> to
-        ///     an Event Hub
-        ///     instance managed by <see cref="eventHubClient" />.
+        ///     <see cref="Send" /> asynchronously publishes <see cref="message" /> to an
+        ///     Event Hub.
         /// </summary>
         /// <param name="message">
-        ///     <see cref="message" /> is the message that will be
-        ///     published to an Event Hub instance managed by <see cref="eventHubClient" />
-        ///     .
-        /// </param>
-        /// <param name="eventHubClient">
-        ///     <see cref="eventHubClient" /> is an instance of
-        ///     <see cref="EventHubClient" /> that retains a connection to an Event Hub
-        ///     instance.
+        ///     <see cref="message" /> is the message that will be published to an Event
+        ///     Hub.
         /// </param>
         /// <exception cref="ArgumentNullException">
         ///     <see cref="ArgumentNullException" /> is
         ///     thrown when <see cref="message" /> is invalid.
         /// </exception>
         /// <exception cref="ArgumentException">
-        ///     <see cref="ArgumentException" /> is thrown
-        ///     when <see cref="eventHubClient" /> does not retain a valid connection to
-        ///     Event Hub.
+        ///     <see cref="ArgumentException" /> is thrown when no valid connection to
+        ///     Event Hub exists.
         /// </exception>
         /// <exception cref="EventHubToolboxException">
         ///     <see cref="EventHubToolboxException" /> is thrown when
         ///     <see cref="message" /> cannot be published to an Event Hub instance.
         /// </exception>
-        /// <returns><see cref="Task{TResult}" /> (an empty async response).</returns>
-        public static async Task SendAsync(
-            string message,
-            EventHubClient eventHubClient)
+        public async Task SendAsync(string message)
         {
             if (string.IsNullOrEmpty(message))
             {
                 throw new ArgumentNullException(nameof(message));
             }
-            if (eventHubClient == null || eventHubClient.IsClosed)
+            if (_eventHubClient == null || _eventHubClient.IsClosed)
             {
                 throw new ArgumentException(
                     ErrorMessageResources.Uninitialized,
-                    nameof(eventHubClient));
+                    nameof(_eventHubClient));
             }
             try
             {
-                await eventHubClient.SendAsync(
+                await _eventHubClient.SendAsync(
                     new EventData(Encoding.UTF8.GetBytes(message)));
             }
             catch (Exception exception)
@@ -186,6 +159,11 @@ namespace Daishi.Pluralsight.EventHub
         ///     <see cref="Subscribe" /> acquires a lease on an Event
         ///     Hub partition, and reads events from the Event Hub as they are published.
         /// </summary>
+        /// <param name="hostName">
+        ///     <see cref="hostName" /> is a unique identifier assigned
+        ///     to a running instance of <see cref="EventProcessorHost" />, created by this
+        ///     method.
+        /// </param>
         /// <param name="eventHubConnectionString">
         ///     <see cref="eventHubConnectionString" /> is the connection-string to the
         ///     Event Hub.
@@ -213,6 +191,7 @@ namespace Daishi.Pluralsight.EventHub
         ///     partition.
         /// </param>
         public void Subscribe(
+            string hostName,
             string eventHubConnectionString,
             string eventHubName,
             string storageAccountName,
@@ -220,6 +199,10 @@ namespace Daishi.Pluralsight.EventHub
             IEventProcessor eventProcessor,
             EventProcessorOptions eventProcessorOptions = null)
         {
+            if (string.IsNullOrEmpty(hostName))
+            {
+                throw new ArgumentNullException(nameof(hostName));
+            }
             if (string.IsNullOrEmpty(eventHubConnectionString))
             {
                 throw new ArgumentNullException(nameof(eventHubConnectionString));
@@ -240,17 +223,18 @@ namespace Daishi.Pluralsight.EventHub
             {
                 throw new ArgumentNullException(nameof(eventProcessor));
             }
-            if (IsSubscribed)
+            if (_eventProcessorHosts.ContainsKey(hostName))
             {
-                _eventProcessorHost?.UnregisterEventProcessorAsync().Wait();
+                var existingEventPrpocessorHost = _eventProcessorHosts[hostName];
+                existingEventPrpocessorHost.UnregisterEventProcessorAsync().Wait();
             }
 
             var storageConnectionString =
                 $"DefaultEndpointsProtocol=https;AccountName={storageAccountName}" +
                 $";AccountKey={storageAccountKey}";
 
-            _eventProcessorHost = new EventProcessorHost(
-                Guid.NewGuid().ToString(),
+            var eventProcessorHost = new EventProcessorHost(
+                hostName,
                 eventHubName,
                 EventHubConsumerGroup.DefaultGroupName,
                 eventHubConnectionString,
@@ -260,25 +244,30 @@ namespace Daishi.Pluralsight.EventHub
 
             if (eventProcessorOptions == null)
             {
-                _eventProcessorHost
+                eventProcessorHost
                     .RegisterEventProcessorFactoryAsync(factory)
                     .Wait();
             }
             else
             {
-                _eventProcessorHost
+                eventProcessorHost
                     .RegisterEventProcessorFactoryAsync(
                         factory,
                         eventProcessorOptions)
                     .Wait();
             }
-            IsSubscribed = true;
+            _eventProcessorHosts.Add(hostName, eventProcessorHost);
         }
 
         /// <summary>
-        ///     <see cref="SubscribeAsync" /> asynchronously acquires a lease on an Event
+        ///     <see cref="Subscribe" /> acquires a lease on an Event
         ///     Hub partition, and reads events from the Event Hub as they are published.
         /// </summary>
+        /// <param name="hostName">
+        ///     <see cref="hostName" /> is a unique identifier assigned
+        ///     to a running instance of <see cref="EventProcessorHost" />, created by this
+        ///     method.
+        /// </param>
         /// <param name="eventHubConnectionString">
         ///     <see cref="eventHubConnectionString" /> is the connection-string to the
         ///     Event Hub.
@@ -305,8 +294,8 @@ namespace Daishi.Pluralsight.EventHub
         ///     -handling, among other things, when interfacing with the Event hub
         ///     partition.
         /// </param>
-        /// <returns><see cref="Task{TResult}" /> (an empty async response).</returns>
         public async Task SubscribeAsync(
+            string hostName,
             string eventHubConnectionString,
             string eventHubName,
             string storageAccountName,
@@ -314,6 +303,10 @@ namespace Daishi.Pluralsight.EventHub
             IEventProcessor eventProcessor,
             EventProcessorOptions eventProcessorOptions = null)
         {
+            if (string.IsNullOrEmpty(hostName))
+            {
+                throw new ArgumentNullException(nameof(hostName));
+            }
             if (string.IsNullOrEmpty(eventHubConnectionString))
             {
                 throw new ArgumentNullException(nameof(eventHubConnectionString));
@@ -334,17 +327,18 @@ namespace Daishi.Pluralsight.EventHub
             {
                 throw new ArgumentNullException(nameof(eventProcessor));
             }
-            if (IsSubscribed)
+            if (_eventProcessorHosts.ContainsKey(hostName))
             {
-                _eventProcessorHost?.UnregisterEventProcessorAsync().Wait();
+                var existingEventPrpocessorHost = _eventProcessorHosts[hostName];
+                await existingEventPrpocessorHost.UnregisterEventProcessorAsync();
             }
 
             var storageConnectionString =
                 $"DefaultEndpointsProtocol=https;AccountName={storageAccountName}" +
                 $";AccountKey={storageAccountKey}";
 
-            _eventProcessorHost = new EventProcessorHost(
-                Guid.NewGuid().ToString(),
+            var eventProcessorHost = new EventProcessorHost(
+                hostName,
                 eventHubName,
                 EventHubConsumerGroup.DefaultGroupName,
                 eventHubConnectionString,
@@ -354,40 +348,64 @@ namespace Daishi.Pluralsight.EventHub
 
             if (eventProcessorOptions == null)
             {
-                await _eventProcessorHost
+                await eventProcessorHost
                     .RegisterEventProcessorFactoryAsync(factory);
             }
             else
             {
-                await _eventProcessorHost
+                await eventProcessorHost
                     .RegisterEventProcessorFactoryAsync(
                         factory,
                         eventProcessorOptions);
             }
-            IsSubscribed = true;
+            _eventProcessorHosts.Add(hostName, eventProcessorHost);
         }
 
+        // todo: CancellationToken, exception-handling.
+
         /// <summary>
-        ///     <see cref="Unsubscribe" /> resets the lease on the currently subscribed-to
-        ///     Event Hub partition, if applicable.
+        ///     <see cref="UnsubscribeAll" /> resets the lease on all currently
+        ///     subscribed-to Event Hub partition(s), if any.
         /// </summary>
-        public void Unsubscribe()
+        public void UnsubscribeAll()
         {
-            if (IsSubscribed)
+            if (!IsSubscribedToAny) return;
+            foreach (var eventProcessorHost in _eventProcessorHosts.Values)
             {
-                _eventProcessorHost?.UnregisterEventProcessorAsync().Wait();
+                try
+                {
+                    eventProcessorHost.UnregisterEventProcessorAsync().Wait();
+                }
+                catch (Exception exception)
+                {
+                    throw new EventHubToolboxException(
+                        $"Unable to un-subscribe from {eventProcessorHost.HostName}.",
+                        exception);
+                }
             }
         }
 
         /// <summary>
-        ///     <see cref="UnsubscribeAsync" /> asynchronously resets the lease on the
-        ///     currently subscribed-to Event Hub partition, if applicable.
+        ///     <see cref="UnsubscribeAllAsync" /> asynchronously resets the lease on all
+        ///     currently subscribed-to Event Hub partition(s), if any.
         /// </summary>
-        public async Task UnsubscribeAsync()
+        public async Task UnsubscribeAllAsync()
         {
-            if (IsSubscribed && _eventProcessorHost != null)
+            if (IsSubscribedToAny)
             {
-                await _eventProcessorHost.UnregisterEventProcessorAsync();
+                foreach (var eventProcessorHost in _eventProcessorHosts.Values)
+                {
+                    try
+                    {
+                        await eventProcessorHost.UnregisterEventProcessorAsync();
+                    }
+                    catch (Exception exception)
+                    {
+                        throw new EventHubToolboxException(
+                            $"Unable to un-subscribe from {eventProcessorHost.HostName}.",
+                            exception);
+                    }
+                }
             }
         }
     }

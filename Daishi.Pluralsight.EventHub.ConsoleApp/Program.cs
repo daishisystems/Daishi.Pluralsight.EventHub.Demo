@@ -16,15 +16,12 @@ namespace Daishi.Pluralsight.EventHub.ConsoleApp
         {
             Console.ForegroundColor = ConsoleColor.Green;
 
-            EventHubClient eventHubClient;
             var eventHubConnectionString =
                 ConfigurationManager.AppSettings["EventHubConnectionString"];
 
-            var isConnected = EventHubToolbox.Connect(
-                eventHubConnectionString,
-                out eventHubClient);
+            EventHubToolbox.Instance.Connect(eventHubConnectionString);
 
-            if (isConnected)
+            if (EventHubToolbox.Instance.IsConnected)
             {
                 Console.WriteLine(@"Connected OK!");
             }
@@ -46,6 +43,7 @@ namespace Daishi.Pluralsight.EventHub.ConsoleApp
             eventProcessorOptions.ExceptionReceived += EventProcessorOptions_ExceptionReceived;
 
             await EventHubToolbox.Instance.SubscribeAsync(
+                "MyEventHost",
                 eventHubConnectionStringShort,
                 eventHubName,
                 storageAccountName,
@@ -53,10 +51,15 @@ namespace Daishi.Pluralsight.EventHub.ConsoleApp
                 eventReceiver,
                 eventProcessorOptions);
 
-            await EventHubToolbox.SendAsync("TEST", eventHubClient);
+            if (EventHubToolbox.Instance.IsSubscribedToAny)
+            {
+                Console.WriteLine(@"Subscribed!");
+            }
+
+            await EventHubToolbox.Instance.SendAsync("TEST");
 
             Console.ReadLine();
-            await EventHubToolbox.Instance.UnsubscribeAsync();
+            await EventHubToolbox.Instance.UnsubscribeAllAsync();
         }
 
         private static void EventReceiver_Notification(object sender,
