@@ -183,21 +183,24 @@ namespace Daishi.Pluralsight.EventHub
         }
 
         /// <summary>
-        ///     <see cref="Subscribe" /> acquires a lease on an Event Hub partition, and
-        ///     reads events from the Event Hub as they are published.
+        ///     <see cref="Subscribe" /> acquires a lease on an Event
+        ///     Hub partition, and reads events from the Event Hub as they are published.
         /// </summary>
-        /// <param name="storageConnectionString">
-        ///     <see cref="storageConnectionString" /> is
-        ///     the Azure Storage connection-string, used to store events as they are
-        ///     removed from the Event hub.
-        /// </param>
         /// <param name="eventHubConnectionString">
-        ///     <see cref="eventHubConnectionString" />
-        ///     is the connection-string to the Event Hub.
+        ///     <see cref="eventHubConnectionString" /> is the connection-string to the
+        ///     Event Hub.
         /// </param>
         /// <param name="eventHubName">
-        ///     <see cref="eventHubName" /> is the name of the Event
-        ///     Hub.
+        ///     <see cref="eventHubName" /> is the name of the Event Hub.
+        /// </param>
+        /// <param name="storageAccountName">
+        ///     <see cref="storageAccountName" /> is the name assigned to the Azure storage
+        ///     account used to store events as they are removed from the Event hub.
+        /// </param>
+        /// <param name="storageAccountKey">
+        ///     <see cref="storageAccountKey" /> is the access key assigned to the Azure
+        ///     storage account used to store events as they are removed from the Event
+        ///     hub.
         /// </param>
         /// <param name="eventProcessor">
         ///     <see cref="eventProcessor" /> is the
@@ -205,21 +208,18 @@ namespace Daishi.Pluralsight.EventHub
         ///     partition.
         /// </param>
         /// <param name="eventProcessorOptions">
-        ///     <see cref="EventProcessorOptions" /> allows
-        ///     custom <see cref="Exception" />-handling, among other things, when
-        ///     interfacing with the Event hub partition.
+        ///     <see cref="EventProcessorOptions" /> allows custom <see cref="Exception" />
+        ///     -handling, among other things, when interfacing with the Event hub
+        ///     partition.
         /// </param>
         public void Subscribe(
-            string storageConnectionString,
             string eventHubConnectionString,
             string eventHubName,
+            string storageAccountName,
+            string storageAccountKey,
             IEventProcessor eventProcessor,
             EventProcessorOptions eventProcessorOptions = null)
         {
-            if (string.IsNullOrEmpty(storageConnectionString))
-            {
-                throw new ArgumentNullException(nameof(storageConnectionString));
-            }
             if (string.IsNullOrEmpty(eventHubConnectionString))
             {
                 throw new ArgumentNullException(nameof(eventHubConnectionString));
@@ -227,6 +227,14 @@ namespace Daishi.Pluralsight.EventHub
             if (string.IsNullOrEmpty(eventHubName))
             {
                 throw new ArgumentNullException(nameof(eventHubName));
+            }
+            if (string.IsNullOrEmpty(storageAccountName))
+            {
+                throw new ArgumentNullException(nameof(storageAccountName));
+            }
+            if (string.IsNullOrEmpty(storageAccountKey))
+            {
+                throw new ArgumentNullException(nameof(storageAccountKey));
             }
             if (eventProcessor == null)
             {
@@ -236,6 +244,10 @@ namespace Daishi.Pluralsight.EventHub
             {
                 _eventProcessorHost?.UnregisterEventProcessorAsync().Wait();
             }
+
+            var storageConnectionString =
+                $"DefaultEndpointsProtocol=https;AccountName={storageAccountName}" +
+                $";AccountKey={storageAccountKey}";
 
             _eventProcessorHost = new EventProcessorHost(
                 Guid.NewGuid().ToString(),
