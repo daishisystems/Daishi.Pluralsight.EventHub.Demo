@@ -26,7 +26,8 @@ namespace Daishi.Pluralsight.EventHub
 
         public static EventHubToolbox Instance => Lazy.Value;
 
-        public bool IsSubscribedToAny => _eventProcessorHosts.Count > 0;
+        public bool IsSubscribedToAny => _eventProcessorHosts != null
+                                         && _eventProcessorHosts.Count > 0;
 
         public bool IsConnected => _eventHubClient != null && !_eventHubClient.IsClosed;
 
@@ -38,7 +39,6 @@ namespace Daishi.Pluralsight.EventHub
         ///     <see cref="connectionString" /> is the Event Hub
         ///     connection-string.
         /// </param>
-        /// <returns><c>true</c>, on successful connection. Otherwise, <c>false</c>.</returns>
         /// <exception cref="ArgumentNullException">
         ///     <see cref="ArgumentNullException" /> is thrown when
         ///     <see cref="connectionString" /> is invalid.
@@ -67,10 +67,11 @@ namespace Daishi.Pluralsight.EventHub
         }
 
         /// <summary>
-        ///     <see cref="Send" /> publishes <see cref="message" /> to an Event Hub.
+        ///     <see cref="Send" /> publishes <see cref="message" /> to an Event Hub, if
+        ///     connected.
         /// </summary>
         /// <param name="message">
-        ///     <see cref="message" /> is the message that will be published to an Event
+        ///     <see cref="message" /> is the message that will be published to the Event
         ///     Hub.
         /// </param>
         /// <exception cref="ArgumentNullException">
@@ -111,11 +112,12 @@ namespace Daishi.Pluralsight.EventHub
         }
 
         /// <summary>
-        ///     <see cref="Send" /> asynchronously publishes <see cref="message" /> to an
-        ///     Event Hub.
+        ///     <see cref="SendAsync" /> asynchronously publishes <see cref="message" /> to
+        ///     an
+        ///     Event Hub, if connected.
         /// </summary>
         /// <param name="message">
-        ///     <see cref="message" /> is the message that will be published to an Event
+        ///     <see cref="message" /> is the message that will be published to the Event
         ///     Hub.
         /// </param>
         /// <exception cref="ArgumentNullException">
@@ -190,6 +192,18 @@ namespace Daishi.Pluralsight.EventHub
         ///     -handling, among other things, when interfacing with the Event hub
         ///     partition.
         /// </param>
+        /// <exception cref="ArgumentNullException">
+        ///     <see cref="ArgumentNullException" /> is
+        ///     thrown when input metadata pertaining to an Event Hub (e.g.,
+        ///     <see cref="hostName" />/<see cref="eventHubConnectionString" />) is
+        ///     invalid.
+        /// </exception>
+        /// <exception cref="EventHubToolboxException">
+        ///     <see cref="EventHubToolboxException" /> is thrown when an
+        ///     <see cref="Exception" /> occurs while subscribing to
+        ///     <see cref="eventHubName" />, or when un-subscribing from an existing
+        ///     <see cref="EventProcessorHost" /> instance.
+        /// </exception>
         public void Subscribe(
             string hostName,
             string eventHubConnectionString,
@@ -225,42 +239,62 @@ namespace Daishi.Pluralsight.EventHub
             }
             if (_eventProcessorHosts.ContainsKey(hostName))
             {
-                var existingEventPrpocessorHost = _eventProcessorHosts[hostName];
-                existingEventPrpocessorHost.UnregisterEventProcessorAsync().Wait();
+                EventProcessorHost existingEventProcessorHost = null;
+                try
+                {
+                    existingEventProcessorHost = _eventProcessorHosts[hostName];
+                    existingEventProcessorHost.UnregisterEventProcessorAsync().Wait();
+                }
+                catch (Exception exception)
+                {
+                    var eventHubHostName = existingEventProcessorHost != null
+                        ? existingEventProcessorHost.HostName
+                        : "Unknown";
+                    throw new EventHubToolboxException($"Error un-subscribing from {eventHubHostName}.",
+                        exception);
+                }
             }
 
-            var storageConnectionString =
-                $"DefaultEndpointsProtocol=https;AccountName={storageAccountName}" +
-                $";AccountKey={storageAccountKey}";
-
-            var eventProcessorHost = new EventProcessorHost(
-                hostName,
-                eventHubName,
-                EventHubConsumerGroup.DefaultGroupName,
-                eventHubConnectionString,
-                storageConnectionString);
-
-            var factory = new BridgeEventProcessorFactory(eventProcessor);
-
-            if (eventProcessorOptions == null)
+            try
             {
-                eventProcessorHost
-                    .RegisterEventProcessorFactoryAsync(factory)
-                    .Wait();
+                var storageConnectionString =
+                    $"DefaultEndpointsProtocol=https;AccountName={storageAccountName}" +
+                    $";AccountKey={storageAccountKey}";
+
+                var eventProcessorHost = new EventProcessorHost(
+                    hostName,
+                    eventHubName,
+                    EventHubConsumerGroup.DefaultGroupName,
+                    eventHubConnectionString,
+                    storageConnectionString);
+
+                var factory = new BridgeEventProcessorFactory(eventProcessor);
+
+                if (eventProcessorOptions == null)
+                {
+                    eventProcessorHost
+                        .RegisterEventProcessorFactoryAsync(factory)
+                        .Wait();
+                }
+                else
+                {
+                    eventProcessorHost
+                        .RegisterEventProcessorFactoryAsync(
+                            factory,
+                            eventProcessorOptions)
+                        .Wait();
+                }
+                _eventProcessorHosts.Add(hostName, eventProcessorHost);
             }
-            else
+            catch (Exception exception)
             {
-                eventProcessorHost
-                    .RegisterEventProcessorFactoryAsync(
-                        factory,
-                        eventProcessorOptions)
-                    .Wait();
+                throw new EventHubToolboxException($"Error subscribing to {eventHubName}.",
+                    exception);
             }
-            _eventProcessorHosts.Add(hostName, eventProcessorHost);
         }
 
         /// <summary>
-        ///     <see cref="Subscribe" /> acquires a lease on an Event
+        ///     <see cref="SubscribeAsync" /> asynchronously acquires a lease on an Event
         ///     Hub partition, and reads events from the Event Hub as they are published.
         /// </summary>
         /// <param name="hostName">
@@ -294,6 +328,18 @@ namespace Daishi.Pluralsight.EventHub
         ///     -handling, among other things, when interfacing with the Event hub
         ///     partition.
         /// </param>
+        /// <exception cref="ArgumentNullException">
+        ///     <see cref="ArgumentNullException" /> is
+        ///     thrown when input metadata pertaining to an Event Hub (e.g.,
+        ///     <see cref="hostName" />/<see cref="eventHubConnectionString" />) is
+        ///     invalid.
+        /// </exception>
+        /// <exception cref="EventHubToolboxException">
+        ///     <see cref="EventHubToolboxException" /> is thrown when an
+        ///     <see cref="Exception" /> occurs while subscribing to
+        ///     <see cref="eventHubName" />, or when un-subscribing from an existing
+        ///     <see cref="EventProcessorHost" /> instance.
+        /// </exception>
         public async Task SubscribeAsync(
             string hostName,
             string eventHubConnectionString,
@@ -329,45 +375,66 @@ namespace Daishi.Pluralsight.EventHub
             }
             if (_eventProcessorHosts.ContainsKey(hostName))
             {
-                var existingEventPrpocessorHost = _eventProcessorHosts[hostName];
-                await existingEventPrpocessorHost.UnregisterEventProcessorAsync();
+                EventProcessorHost existingEventProcessorHost = null;
+                try
+                {
+                    existingEventProcessorHost = _eventProcessorHosts[hostName];
+                    await existingEventProcessorHost.UnregisterEventProcessorAsync();
+                }
+                catch (Exception exception)
+                {
+                    var eventHubHostName = existingEventProcessorHost != null
+                        ? existingEventProcessorHost.HostName
+                        : "Unknown";
+                    throw new EventHubToolboxException($"Error un-subscribing from {eventHubHostName}.",
+                        exception);
+                }
             }
 
-            var storageConnectionString =
-                $"DefaultEndpointsProtocol=https;AccountName={storageAccountName}" +
-                $";AccountKey={storageAccountKey}";
-
-            var eventProcessorHost = new EventProcessorHost(
-                hostName,
-                eventHubName,
-                EventHubConsumerGroup.DefaultGroupName,
-                eventHubConnectionString,
-                storageConnectionString);
-
-            var factory = new BridgeEventProcessorFactory(eventProcessor);
-
-            if (eventProcessorOptions == null)
+            try
             {
-                await eventProcessorHost
-                    .RegisterEventProcessorFactoryAsync(factory);
+                var storageConnectionString =
+                    $"DefaultEndpointsProtocol=https;AccountName={storageAccountName}" +
+                    $";AccountKey={storageAccountKey}";
+
+                var eventProcessorHost = new EventProcessorHost(
+                    hostName,
+                    eventHubName,
+                    EventHubConsumerGroup.DefaultGroupName,
+                    eventHubConnectionString,
+                    storageConnectionString);
+
+                var factory = new BridgeEventProcessorFactory(eventProcessor);
+
+                if (eventProcessorOptions == null)
+                {
+                    await eventProcessorHost
+                        .RegisterEventProcessorFactoryAsync(factory);
+                }
+                else
+                {
+                    await eventProcessorHost
+                        .RegisterEventProcessorFactoryAsync(
+                            factory,
+                            eventProcessorOptions);
+                }
+                _eventProcessorHosts.Add(hostName, eventProcessorHost);
             }
-            else
+            catch (Exception exception)
             {
-                await eventProcessorHost
-                    .RegisterEventProcessorFactoryAsync(
-                        factory,
-                        eventProcessorOptions);
+                throw new EventHubToolboxException($"Error subscribing to {eventHubName}.",
+                    exception);
             }
-            _eventProcessorHosts.Add(hostName, eventProcessorHost);
         }
 
         // todo: CancellationToken, exception-handling.
+        // todo: Unit Tests, functional abstraction
         // todo: Graphics, animations, blog post.
 
-        /// <summary>
-        ///     <see cref="UnsubscribeAll" /> resets the lease on all currently
-        ///     subscribed-to Event Hub partition(s), if any.
-        /// </summary>
+            /// <summary>
+            ///     <see cref="UnsubscribeAll" /> resets the lease on all currently
+            ///     subscribed-to Event Hub partition(s), if any.
+            /// </summary>
         public void UnsubscribeAll()
         {
             if (!IsSubscribedToAny) return;
