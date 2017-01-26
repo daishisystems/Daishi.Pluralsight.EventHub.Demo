@@ -362,6 +362,7 @@ namespace Daishi.Pluralsight.EventHub
         }
 
         // todo: CancellationToken, exception-handling.
+        // todo: Graphics, animations, blog post.
 
         /// <summary>
         ///     <see cref="UnsubscribeAll" /> resets the lease on all currently
@@ -370,11 +371,14 @@ namespace Daishi.Pluralsight.EventHub
         public void UnsubscribeAll()
         {
             if (!IsSubscribedToAny) return;
+            var unregisteredHostNames = new List<string>();
+
             foreach (var eventProcessorHost in _eventProcessorHosts.Values)
             {
                 try
                 {
                     eventProcessorHost.UnregisterEventProcessorAsync().Wait();
+                    unregisteredHostNames.Add(eventProcessorHost.HostName);
                 }
                 catch (Exception exception)
                 {
@@ -382,6 +386,10 @@ namespace Daishi.Pluralsight.EventHub
                         $"Unable to un-subscribe from {eventProcessorHost.HostName}.",
                         exception);
                 }
+            }
+            foreach (var hostName in unregisteredHostNames)
+            {
+                _eventProcessorHosts.Remove(hostName);
             }
         }
 
@@ -393,11 +401,13 @@ namespace Daishi.Pluralsight.EventHub
         {
             if (IsSubscribedToAny)
             {
+                var unregisteredHostNames = new List<string>();
                 foreach (var eventProcessorHost in _eventProcessorHosts.Values)
                 {
                     try
                     {
                         await eventProcessorHost.UnregisterEventProcessorAsync();
+                        unregisteredHostNames.Add(eventProcessorHost.HostName);
                     }
                     catch (Exception exception)
                     {
@@ -406,7 +416,33 @@ namespace Daishi.Pluralsight.EventHub
                             exception);
                     }
                 }
+                foreach (var hostName in unregisteredHostNames)
+                {
+                    _eventProcessorHosts.Remove(hostName);
+                }
             }
+        }
+
+        /// <summary>
+        ///     <see cref="IsSubscribedTo" /> returns <c>true</c> if
+        ///     <see cref="hostName" /> is currently subscribed-to.
+        /// </summary>
+        /// <param name="hostName">
+        ///     <see cref="hostName" /> is the name of the host that is
+        ///     potentially subscribed-to.
+        /// </param>
+        /// <returns>
+        ///     Returns <c>true</c> if <see cref="hostName" /> is currently
+        ///     subscribed-to.
+        /// </returns>
+        public bool IsSubscribedTo(string hostName)
+        {
+            if (string.IsNullOrEmpty(hostName))
+            {
+                throw new ArgumentNullException(nameof(hostName));
+            }
+            return _eventProcessorHosts != null
+                   && _eventProcessorHosts.ContainsKey(hostName);
         }
     }
 }
