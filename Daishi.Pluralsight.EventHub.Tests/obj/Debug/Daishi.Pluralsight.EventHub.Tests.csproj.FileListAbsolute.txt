@@ -1,8 +1,6 @@
 C:\Users\mooneyp\Documents\GitHub\Daishi.Pluralsight.EventHub\Daishi.Pluralsight.EventHub.Tests\obj\Debug\Daishi.Pluralsight.EventHub.Tests.csprojResolveAssemblyReference.cache
 C:\Users\mooneyp\Documents\GitHub\Daishi.Pluralsight.EventHub\Daishi.Pluralsight.EventHub.Tests\bin\Debug\Daishi.Pluralsight.EventHub.Tests.dll
 C:\Users\mooneyp\Documents\GitHub\Daishi.Pluralsight.EventHub\Daishi.Pluralsight.EventHub.Tests\bin\Debug\Daishi.Pluralsight.EventHub.Tests.pdb
-C:\Users\mooneyp\Documents\GitHub\Daishi.Pluralsight.EventHub\Daishi.Pluralsight.EventHub.Tests\bin\Debug\Daishi.Pluralsight.EventHub.Tests.dll.CodeAnalysisLog.xml
-C:\Users\mooneyp\Documents\GitHub\Daishi.Pluralsight.EventHub\Daishi.Pluralsight.EventHub.Tests\bin\Debug\Daishi.Pluralsight.EventHub.Tests.dll.lastcodeanalysissucceeded
 C:\Users\mooneyp\Documents\GitHub\Daishi.Pluralsight.EventHub\Daishi.Pluralsight.EventHub.Tests\bin\Debug\Daishi.Pluralsight.EventHub.dll
 C:\Users\mooneyp\Documents\GitHub\Daishi.Pluralsight.EventHub\Daishi.Pluralsight.EventHub.Tests\bin\Debug\Microsoft.VisualStudio.QualityTools.UnitTestFramework.dll
 C:\Users\mooneyp\Documents\GitHub\Daishi.Pluralsight.EventHub\Daishi.Pluralsight.EventHub.Tests\bin\Debug\Microsoft.ServiceBus.Messaging.EventProcessorHost.dll
@@ -61,3 +59,5 @@ C:\Users\mooneyp\Documents\GitHub\Daishi.Pluralsight.EventHub\Daishi.Pluralsight
 C:\Users\mooneyp\Documents\GitHub\Daishi.Pluralsight.EventHub\Daishi.Pluralsight.EventHub.Tests\bin\Debug\zh-Hant\System.Spatial.resources.dll
 C:\Users\mooneyp\Documents\GitHub\Daishi.Pluralsight.EventHub\Daishi.Pluralsight.EventHub.Tests\obj\Debug\Daishi.Pluralsight.EventHub.Tests.dll
 C:\Users\mooneyp\Documents\GitHub\Daishi.Pluralsight.EventHub\Daishi.Pluralsight.EventHub.Tests\obj\Debug\Daishi.Pluralsight.EventHub.Tests.pdb
+C:\Users\mooneyp\Documents\GitHub\Daishi.Pluralsight.EventHub\Daishi.Pluralsight.EventHub.Tests\bin\Debug\Daishi.Pluralsight.EventHub.Tests.dll.CodeAnalysisLog.xml
+C:\Users\mooneyp\Documents\GitHub\Daishi.Pluralsight.EventHub\Daishi.Pluralsight.EventHub.Tests\bin\Debug\Daishi.Pluralsight.EventHub.Tests.dll.lastcodeanalysissucceeded

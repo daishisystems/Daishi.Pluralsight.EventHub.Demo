@@ -12,7 +12,7 @@ namespace Daishi.Pluralsight.EventHub
     ///     <see cref="EventReceiver" /> interfaces with Event Hub, subscribing to, and
     ///     downloading events as they are output.
     /// </summary>
-    public class EventReceiver : IEventProcessor
+    public sealed class EventReceiver : IEventProcessor
     {
         /// <summary>
         ///     <see cref="EventHandler" /> is a function pointer that facilitates both
@@ -48,7 +48,7 @@ namespace Daishi.Pluralsight.EventHub
         ///     un-subscription.
         /// </param>
         /// <returns><see cref="Task{TResult}" /> (an empty async response).</returns>
-        async Task IEventProcessor.CloseAsync(
+        public async Task CloseAsync(
             PartitionContext context,
             CloseReason reason)
         {
@@ -73,7 +73,7 @@ namespace Daishi.Pluralsight.EventHub
         ///     <see cref="PartitionContext" /> to which this instance will subscribe.
         /// </param>
         /// <returns><see cref="Task{TResult}" /> (an empty async response).</returns>
-        Task IEventProcessor.OpenAsync(PartitionContext context)
+        public Task OpenAsync(PartitionContext context)
         {
             _checkpointStopWatch = new Stopwatch();
             _checkpointStopWatch.Start();
@@ -106,7 +106,7 @@ namespace Daishi.Pluralsight.EventHub
         ///     <see cref="IEventProcessor.ProcessEventsAsync" /> raises
         ///     <see cref="Notification" /> and <see cref="EventReceived" /> events.
         /// </remarks>
-        async Task IEventProcessor.ProcessEventsAsync(PartitionContext context,
+        public async Task ProcessEventsAsync(PartitionContext context,
             IEnumerable<EventData> messages)
         {
             foreach (var @event in messages
@@ -152,7 +152,7 @@ namespace Daishi.Pluralsight.EventHub
         ///     <see cref="e" /> is an <see cref="EventReceiverEventArgs" />
         ///     instance containing a notification message.
         /// </param>
-        protected virtual void OnNotification(EventReceiverEventArgs e)
+        private void OnNotification(EventReceiverEventArgs e)
         {
             Notification?.Invoke(this, e);
         }
@@ -165,7 +165,7 @@ namespace Daishi.Pluralsight.EventHub
         ///     <see cref="e" /> is an <see cref="EventReceiverEventArgs" />
         ///     instance containing the event itself in serialised, UTF-8-format.
         /// </param>
-        protected virtual void OnEventReceived(EventReceiverEventArgs e)
+        private void OnEventReceived(EventReceiverEventArgs e)
         {
             EventReceived?.Invoke(this, e);
         }
