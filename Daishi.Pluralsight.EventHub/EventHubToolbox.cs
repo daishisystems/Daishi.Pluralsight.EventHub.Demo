@@ -427,7 +427,6 @@ namespace Daishi.Pluralsight.EventHub
             }
         }
 
-        // todo: CancellationToken, exception-handling.
         // todo: Unit Tests, functional abstraction
         // todo: Graphics, animations, blog post.
 

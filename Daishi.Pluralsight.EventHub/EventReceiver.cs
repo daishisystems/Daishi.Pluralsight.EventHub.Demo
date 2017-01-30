@@ -25,7 +25,14 @@ namespace Daishi.Pluralsight.EventHub
             object sender,
             EventReceiverEventArgs e);
 
+        private readonly TimeSpan _checkPointInterval;
+
         private Stopwatch _checkpointStopWatch;
+
+        public EventReceiver(TimeSpan checkPointInterval)
+        {
+            _checkPointInterval = checkPointInterval;
+        }
 
         /// <summary>
         ///     <see cref="IEventProcessor.CloseAsync" /> un-subscribes this instance from
@@ -116,7 +123,7 @@ namespace Daishi.Pluralsight.EventHub
                               $"Data: '{@event}'."
                 });
             }
-            if (_checkpointStopWatch.Elapsed > TimeSpan.FromMinutes(5))
+            if (_checkpointStopWatch.Elapsed > _checkPointInterval)
             {
                 await context.CheckpointAsync();
                 _checkpointStopWatch.Restart();

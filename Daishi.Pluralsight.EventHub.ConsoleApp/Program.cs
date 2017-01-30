@@ -35,7 +35,7 @@ namespace Daishi.Pluralsight.EventHub.ConsoleApp
             var storageAccountKey =
                 ConfigurationManager.AppSettings["StorageAccountKey"];
 
-            var eventReceiver = new EventReceiver();
+            var eventReceiver = new EventReceiver(TimeSpan.FromMinutes(5));
             eventReceiver.Notification += EventReceiver_Notification;
             eventReceiver.EventReceived += EventReceiverEventReceived;
 
