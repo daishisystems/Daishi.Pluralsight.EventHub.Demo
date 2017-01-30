@@ -49,6 +49,8 @@ namespace Daishi.Pluralsight.EventHub.ConsoleApp
                 storageAccountName,
                 storageAccountKey,
                 eventReceiver,
+                EventHubToolbox.UnRegisterAsync,
+                EventHubToolbox.RegisterAsync,
                 eventProcessorOptions);
 
             if (EventHubToolbox.Instance.IsSubscribedToAny)

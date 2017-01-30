@@ -2,7 +2,7 @@
 
 namespace Daishi.Pluralsight.EventHub
 {
-    internal class BridgeEventProcessorFactory : IEventProcessorFactory
+    public class BridgeEventProcessorFactory : IEventProcessorFactory
     {
         private readonly IEventProcessor _eventReceiver;
 

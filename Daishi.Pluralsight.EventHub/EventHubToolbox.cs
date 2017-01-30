@@ -158,7 +158,7 @@ namespace Daishi.Pluralsight.EventHub
         }
 
         /// <summary>
-        ///     <see cref="Subscribe" /> acquires a lease on an Event
+        ///     <see cref="Subscribe" /> asynchronously acquires a lease on an Event
         ///     Hub partition, and reads events from the Event Hub as they are published.
         /// </summary>
         /// <param name="hostName">
@@ -187,10 +187,21 @@ namespace Daishi.Pluralsight.EventHub
         ///     <see cref="IEventProcessor" /> instance that interfaces with the Event Hub
         ///     partition.
         /// </param>
+        /// <param name="registerAction">
+        ///     <see cref="registerAction" /> is a function that
+        ///     abstracts the <see cref="EventProcessorHost" /> registration process
+        ///     outside
+        ///     of this method, in order to facilitate unit-testing.
+        /// </param>
         /// <param name="eventProcessorOptions">
         ///     <see cref="EventProcessorOptions" /> allows custom <see cref="Exception" />
         ///     -handling, among other things, when interfacing with the Event hub
         ///     partition.
+        /// </param>
+        /// <param name="unRegisterAction">
+        ///     <see cref="unRegisterAction" /> is a function that
+        ///     abstracts the <see cref="EventProcessorHost" /> un-register process outside
+        ///     of this method, in order to facilitate unit-testing.
         /// </param>
         /// <exception cref="ArgumentNullException">
         ///     <see cref="ArgumentNullException" /> is
@@ -211,6 +222,10 @@ namespace Daishi.Pluralsight.EventHub
             string storageAccountName,
             string storageAccountKey,
             IEventProcessor eventProcessor,
+            Action<EventProcessorHost> unRegisterAction,
+            Action<EventProcessorHost,
+                BridgeEventProcessorFactory,
+                EventProcessorOptions> registerAction,
             EventProcessorOptions eventProcessorOptions = null)
         {
             if (string.IsNullOrEmpty(hostName))
@@ -243,7 +258,7 @@ namespace Daishi.Pluralsight.EventHub
                 try
                 {
                     existingEventProcessorHost = _eventProcessorHosts[hostName];
-                    existingEventProcessorHost.UnregisterEventProcessorAsync().Wait();
+                    unRegisterAction(existingEventProcessorHost);
                 }
                 catch (Exception exception)
                 {
@@ -270,20 +285,7 @@ namespace Daishi.Pluralsight.EventHub
 
                 var factory = new BridgeEventProcessorFactory(eventProcessor);
 
-                if (eventProcessorOptions == null)
-                {
-                    eventProcessorHost
-                        .RegisterEventProcessorFactoryAsync(factory)
-                        .Wait();
-                }
-                else
-                {
-                    eventProcessorHost
-                        .RegisterEventProcessorFactoryAsync(
-                            factory,
-                            eventProcessorOptions)
-                        .Wait();
-                }
+                registerAction(eventProcessorHost, factory, eventProcessorOptions);
                 _eventProcessorHosts.Add(hostName, eventProcessorHost);
             }
             catch (Exception exception)
@@ -323,10 +325,21 @@ namespace Daishi.Pluralsight.EventHub
         ///     <see cref="IEventProcessor" /> instance that interfaces with the Event Hub
         ///     partition.
         /// </param>
+        /// <param name="registerFunc">
+        ///     <see cref="registerFunc" /> is a function that
+        ///     abstracts the <see cref="EventProcessorHost" /> registration process
+        ///     outside
+        ///     of this method, in order to facilitate unit-testing.
+        /// </param>
         /// <param name="eventProcessorOptions">
         ///     <see cref="EventProcessorOptions" /> allows custom <see cref="Exception" />
         ///     -handling, among other things, when interfacing with the Event hub
         ///     partition.
+        /// </param>
+        /// <param name="unRegisterFunc">
+        ///     <see cref="unRegisterFunc" /> is a function that
+        ///     abstracts the <see cref="EventProcessorHost" /> un-register process outside
+        ///     of this method, in order to facilitate unit-testing.
         /// </param>
         /// <exception cref="ArgumentNullException">
         ///     <see cref="ArgumentNullException" /> is
@@ -347,6 +360,12 @@ namespace Daishi.Pluralsight.EventHub
             string storageAccountName,
             string storageAccountKey,
             IEventProcessor eventProcessor,
+            Func<EventProcessorHost,
+                Task> unRegisterFunc,
+            Func<EventProcessorHost,
+                BridgeEventProcessorFactory,
+                EventProcessorOptions,
+                Task> registerFunc,
             EventProcessorOptions eventProcessorOptions = null)
         {
             if (string.IsNullOrEmpty(hostName))
@@ -379,7 +398,7 @@ namespace Daishi.Pluralsight.EventHub
                 try
                 {
                     existingEventProcessorHost = _eventProcessorHosts[hostName];
-                    await existingEventProcessorHost.UnregisterEventProcessorAsync();
+                    await unRegisterFunc(existingEventProcessorHost);
                 }
                 catch (Exception exception)
                 {
@@ -406,18 +425,7 @@ namespace Daishi.Pluralsight.EventHub
 
                 var factory = new BridgeEventProcessorFactory(eventProcessor);
 
-                if (eventProcessorOptions == null)
-                {
-                    await eventProcessorHost
-                        .RegisterEventProcessorFactoryAsync(factory);
-                }
-                else
-                {
-                    await eventProcessorHost
-                        .RegisterEventProcessorFactoryAsync(
-                            factory,
-                            eventProcessorOptions);
-                }
+                await registerFunc(eventProcessorHost, factory, eventProcessorOptions);
                 _eventProcessorHosts.Add(hostName, eventProcessorHost);
             }
             catch (Exception exception)
@@ -427,7 +435,6 @@ namespace Daishi.Pluralsight.EventHub
             }
         }
 
-        // todo: Unit Tests, functional abstraction
         // todo: Graphics, animations, blog post.
 
         /// <summary>
@@ -519,6 +526,78 @@ namespace Daishi.Pluralsight.EventHub
             }
             return _eventProcessorHosts != null
                    && _eventProcessorHosts.ContainsKey(hostName);
+        }
+
+        /// <summary>
+        ///     <see cref="Register" /> registers
+        ///     <see cref="bridgeEventProcessorFactory" /> with
+        ///     <see cref="eventProcessorHost" /> and <see cref="eventProcessorOptions" />,
+        ///     if applicable.
+        /// </summary>
+        /// <param name="eventProcessorHost">
+        ///     <see cref="eventProcessorHost" /> is the
+        ///     <see cref="EventProcessorHost" /> instance to register.
+        /// </param>
+        /// <param name="bridgeEventProcessorFactory">
+        ///     <see cref="bridgeEventProcessorFactory" /> is the
+        ///     <see cref="BridgeEventProcessorFactory" /> instance to register.
+        /// </param>
+        /// <param name="eventProcessorOptions">
+        ///     <see cref="eventProcessorOptions" /> is the
+        ///     <see cref="EventProcessorOptions" /> instance to register, if applicable.
+        /// </param>
+        public static void Register(
+            EventProcessorHost eventProcessorHost,
+            BridgeEventProcessorFactory bridgeEventProcessorFactory,
+            EventProcessorOptions eventProcessorOptions = null)
+        {
+            if (eventProcessorOptions == null)
+            {
+                eventProcessorHost.RegisterEventProcessorFactoryAsync(
+                    bridgeEventProcessorFactory).Wait();
+            }
+            else
+            {
+                eventProcessorHost.RegisterEventProcessorFactoryAsync(
+                    bridgeEventProcessorFactory,
+                    eventProcessorOptions).Wait();
+            }
+        }
+
+        /// <summary>
+        ///     <see cref="RegisterAsync" /> asynchronously registers
+        ///     <see cref="bridgeEventProcessorFactory" /> with
+        ///     <see cref="eventProcessorHost" /> and <see cref="eventProcessorOptions" />,
+        ///     if applicable.
+        /// </summary>
+        /// <param name="eventProcessorHost">
+        ///     <see cref="eventProcessorHost" /> is the
+        ///     <see cref="EventProcessorHost" /> instance to register.
+        /// </param>
+        /// <param name="bridgeEventProcessorFactory">
+        ///     <see cref="bridgeEventProcessorFactory" /> is the
+        ///     <see cref="BridgeEventProcessorFactory" /> instance to register.
+        /// </param>
+        /// <param name="eventProcessorOptions">
+        ///     <see cref="eventProcessorOptions" /> is the
+        ///     <see cref="EventProcessorOptions" /> instance to register, if applicable.
+        /// </param>
+        public static async Task RegisterAsync(
+            EventProcessorHost eventProcessorHost,
+            BridgeEventProcessorFactory bridgeEventProcessorFactory,
+            EventProcessorOptions eventProcessorOptions = null)
+        {
+            if (eventProcessorOptions == null)
+            {
+                await eventProcessorHost.RegisterEventProcessorFactoryAsync(
+                    bridgeEventProcessorFactory);
+            }
+            else
+            {
+                await eventProcessorHost.RegisterEventProcessorFactoryAsync(
+                    bridgeEventProcessorFactory,
+                    eventProcessorOptions);
+            }
         }
 
         /// <summary>

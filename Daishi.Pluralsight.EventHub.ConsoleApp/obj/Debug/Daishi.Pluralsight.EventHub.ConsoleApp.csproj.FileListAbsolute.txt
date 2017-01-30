@@ -59,3 +59,5 @@ C:\Users\mooneyp\Documents\GitHub\Daishi.Pluralsight.EventHub\Daishi.Pluralsight
 C:\Users\mooneyp\Documents\GitHub\Daishi.Pluralsight.EventHub\Daishi.Pluralsight.EventHub.ConsoleApp\bin\Debug\ru\System.Spatial.resources.dll
 C:\Users\mooneyp\Documents\GitHub\Daishi.Pluralsight.EventHub\Daishi.Pluralsight.EventHub.ConsoleApp\bin\Debug\zh-Hans\System.Spatial.resources.dll
 C:\Users\mooneyp\Documents\GitHub\Daishi.Pluralsight.EventHub\Daishi.Pluralsight.EventHub.ConsoleApp\bin\Debug\zh-Hant\System.Spatial.resources.dll
+C:\Users\mooneyp\Documents\GitHub\Daishi.Pluralsight.EventHub\Daishi.Pluralsight.EventHub.ConsoleApp\bin\Debug\Daishi.Pluralsight.EventHub.ConsoleApp.exe.CodeAnalysisLog.xml
+C:\Users\mooneyp\Documents\GitHub\Daishi.Pluralsight.EventHub\Daishi.Pluralsight.EventHub.ConsoleApp\bin\Debug\Daishi.Pluralsight.EventHub.ConsoleApp.exe.lastcodeanalysissucceeded
