@@ -430,11 +430,16 @@ namespace Daishi.Pluralsight.EventHub
         // todo: Unit Tests, functional abstraction
         // todo: Graphics, animations, blog post.
 
-            /// <summary>
-            ///     <see cref="UnsubscribeAll" /> resets the lease on all currently
-            ///     subscribed-to Event Hub partition(s), if any.
-            /// </summary>
-        public void UnsubscribeAll()
+        /// <summary>
+        ///     <see cref="UnsubscribeAll" /> resets the lease on all
+        ///     currently subscribed-to Event Hub partition(s), if any.
+        /// </summary>
+        /// <param name="unregisterAction">
+        ///     <see cref="unregisterAction" /> is a function that
+        ///     abstracts the <see cref="EventProcessorHost" /> un-register process outside
+        ///     of this method, in order to facilitate unit-testing.
+        /// </param>
+        public void UnsubscribeAll(Action<EventProcessorHost> unregisterAction)
         {
             if (!IsSubscribedToAny) return;
             var unregisteredHostNames = new List<string>();
@@ -443,7 +448,7 @@ namespace Daishi.Pluralsight.EventHub
             {
                 try
                 {
-                    eventProcessorHost.UnregisterEventProcessorAsync().Wait();
+                    unregisterAction(eventProcessorHost);
                     unregisteredHostNames.Add(eventProcessorHost.HostName);
                 }
                 catch (Exception exception)
@@ -463,7 +468,12 @@ namespace Daishi.Pluralsight.EventHub
         ///     <see cref="UnsubscribeAllAsync" /> asynchronously resets the lease on all
         ///     currently subscribed-to Event Hub partition(s), if any.
         /// </summary>
-        public async Task UnsubscribeAllAsync()
+        /// <param name="unregisterFunc">
+        ///     <see cref="unregisterFunc" /> is a function that
+        ///     abstracts the <see cref="EventProcessorHost" /> un-register process outside
+        ///     of this method, in order to facilitate unit-testing.
+        /// </param>
+        public async Task UnsubscribeAllAsync(Func<EventProcessorHost, Task> unregisterFunc)
         {
             if (IsSubscribedToAny)
             {
@@ -472,7 +482,7 @@ namespace Daishi.Pluralsight.EventHub
                 {
                     try
                     {
-                        await eventProcessorHost.UnregisterEventProcessorAsync();
+                        await unregisterFunc(eventProcessorHost);
                         unregisteredHostNames.Add(eventProcessorHost.HostName);
                     }
                     catch (Exception exception)
@@ -509,6 +519,37 @@ namespace Daishi.Pluralsight.EventHub
             }
             return _eventProcessorHosts != null
                    && _eventProcessorHosts.ContainsKey(hostName);
+        }
+
+        /// <summary>
+        ///     <see cref="UnRegister" /> un-registers <see cref="EventProcessorHost" />,
+        ///     shutting down the instance, and allowing the associated Event Hub
+        ///     partition-lease to be released gracefully.
+        /// </summary>
+        /// <param name="eventProcessorHost">
+        ///     <see cref="eventProcessorHost" /> is the
+        ///     <see cref="EventProcessorHost" /> instance to be un-registered.
+        /// </param>
+        /// <remarks>This is a helper function, designed to facilitate unit-testing.</remarks>
+        public static void UnRegister(EventProcessorHost eventProcessorHost)
+        {
+            eventProcessorHost.UnregisterEventProcessorAsync().Wait();
+        }
+
+        /// <summary>
+        ///     <see cref="UnRegisterAsync" /> asynchronously un-registers
+        ///     <see cref="EventProcessorHost" />,
+        ///     shutting down the instance, and allowing the associated Event Hub
+        ///     partition-lease to be released gracefully.
+        /// </summary>
+        /// <param name="eventProcessorHost">
+        ///     <see cref="eventProcessorHost" /> is the
+        ///     <see cref="EventProcessorHost" /> instance to be un-registered.
+        /// </param>
+        /// <remarks>This is a helper function, designed to facilitate unit-testing.</remarks>
+        public static async Task UnRegisterAsync(EventProcessorHost eventProcessorHost)
+        {
+            await eventProcessorHost.UnregisterEventProcessorAsync();
         }
     }
 }

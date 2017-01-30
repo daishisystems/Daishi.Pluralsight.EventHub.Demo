@@ -59,7 +59,7 @@ namespace Daishi.Pluralsight.EventHub.ConsoleApp
             await EventHubToolbox.Instance.SendAsync("TEST");
 
             Console.ReadLine();
-            await EventHubToolbox.Instance.UnsubscribeAllAsync();
+            await EventHubToolbox.Instance.UnsubscribeAllAsync(EventHubToolbox.UnRegisterAsync);
         }
 
         private static void EventReceiver_Notification(object sender,

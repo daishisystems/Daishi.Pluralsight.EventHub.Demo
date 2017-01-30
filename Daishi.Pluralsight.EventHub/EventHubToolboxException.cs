@@ -22,7 +22,9 @@ namespace Daishi.Pluralsight.EventHub
         {
         }
 
-        public EventHubToolboxException(string message, Exception inner)
+        public EventHubToolboxException(
+            string message,
+            Exception inner)
             : base(message, inner)
         {
         }
