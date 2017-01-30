@@ -51,6 +51,7 @@ namespace Daishi.Pluralsight.EventHub.ConsoleApp
                 eventReceiver,
                 EventHubToolbox.UnRegisterAsync,
                 EventHubToolbox.RegisterAsync,
+                false,
                 eventProcessorOptions);
 
             if (EventHubToolbox.Instance.IsSubscribedToAny)

@@ -15,21 +15,24 @@ namespace Daishi.Pluralsight.EventHub
         private static readonly Lazy<EventHubToolbox> Lazy =
             new Lazy<EventHubToolbox>(() => new EventHubToolbox());
 
-        private readonly Dictionary<string, EventProcessorHost> _eventProcessorHosts;
-
         private EventHubClient _eventHubClient;
 
         private EventHubToolbox()
         {
-            _eventProcessorHosts = new Dictionary<string, EventProcessorHost>();
+            EventProcessorHosts = new Dictionary<string, EventProcessorHost>();
         }
 
         public static EventHubToolbox Instance => Lazy.Value;
 
-        public bool IsSubscribedToAny => _eventProcessorHosts != null
-                                         && _eventProcessorHosts.Count > 0;
+        public bool IsSubscribedToAny => EventProcessorHosts != null
+                                         && EventProcessorHosts.Count > 0;
 
         public bool IsConnected => _eventHubClient != null && !_eventHubClient.IsClosed;
+
+        public Dictionary<string, EventProcessorHost> EventProcessorHosts
+        {
+            get;
+        }
 
         /// <summary>
         ///     <see cref="Connect" /> establishes a connection to an Event Hub instance
@@ -193,6 +196,10 @@ namespace Daishi.Pluralsight.EventHub
         ///     outside
         ///     of this method, in order to facilitate unit-testing.
         /// </param>
+        /// <param name="testMode">
+        ///     <see cref="testMode" /> determines whether or not this
+        ///     function is invoked from a unit-test, or not.
+        /// </param>
         /// <param name="eventProcessorOptions">
         ///     <see cref="EventProcessorOptions" /> allows custom <see cref="Exception" />
         ///     -handling, among other things, when interfacing with the Event hub
@@ -215,6 +222,14 @@ namespace Daishi.Pluralsight.EventHub
         ///     <see cref="eventHubName" />, or when un-subscribing from an existing
         ///     <see cref="EventProcessorHost" /> instance.
         /// </exception>
+        /// <remarks>
+        ///     Added <see cref="testMode" /> in order to swallow
+        ///     <see cref="EventProcessorHost" />-initialisation errors during unit-test
+        ///     invocation. Instantiating <see cref="EventProcessorHost" /> requires a
+        ///     valid Azure Storage Account, and as such, the method cannot be abstracted
+        ///     to return, for example, a default instance of
+        ///     <see cref="EventProcessorHost" />.
+        /// </remarks>
         public void Subscribe(
             string hostName,
             string eventHubConnectionString,
@@ -226,6 +241,7 @@ namespace Daishi.Pluralsight.EventHub
             Action<EventProcessorHost,
                 BridgeEventProcessorFactory,
                 EventProcessorOptions> registerAction,
+            bool testMode = false,
             EventProcessorOptions eventProcessorOptions = null)
         {
             if (string.IsNullOrEmpty(hostName))
@@ -252,12 +268,12 @@ namespace Daishi.Pluralsight.EventHub
             {
                 throw new ArgumentNullException(nameof(eventProcessor));
             }
-            if (_eventProcessorHosts.ContainsKey(hostName))
+            if (EventProcessorHosts.ContainsKey(hostName))
             {
                 EventProcessorHost existingEventProcessorHost = null;
                 try
                 {
-                    existingEventProcessorHost = _eventProcessorHosts[hostName];
+                    existingEventProcessorHost = EventProcessorHosts[hostName];
                     unRegisterAction(existingEventProcessorHost);
                 }
                 catch (Exception exception)
@@ -269,24 +285,33 @@ namespace Daishi.Pluralsight.EventHub
                         exception);
                 }
             }
-
             try
             {
                 var storageConnectionString =
                     $"DefaultEndpointsProtocol=https;AccountName={storageAccountName}" +
                     $";AccountKey={storageAccountKey}";
 
-                var eventProcessorHost = new EventProcessorHost(
-                    hostName,
-                    eventHubName,
-                    EventHubConsumerGroup.DefaultGroupName,
-                    eventHubConnectionString,
-                    storageConnectionString);
-
+                EventProcessorHost eventProcessorHost = null;
+                try
+                {
+                    eventProcessorHost = new EventProcessorHost(
+                        hostName,
+                        eventHubName,
+                        EventHubConsumerGroup.DefaultGroupName,
+                        eventHubConnectionString,
+                        storageConnectionString);
+                }
+                catch (Exception)
+                {
+                    if (!testMode)
+                    {
+                        throw;
+                    }
+                }
                 var factory = new BridgeEventProcessorFactory(eventProcessor);
 
                 registerAction(eventProcessorHost, factory, eventProcessorOptions);
-                _eventProcessorHosts.Add(hostName, eventProcessorHost);
+                EventProcessorHosts.Add(hostName, eventProcessorHost);
             }
             catch (Exception exception)
             {
@@ -331,6 +356,10 @@ namespace Daishi.Pluralsight.EventHub
         ///     outside
         ///     of this method, in order to facilitate unit-testing.
         /// </param>
+        /// <param name="testMode">
+        ///     <see cref="testMode" /> determines whether or not this
+        ///     function is invoked from a unit-test, or not.
+        /// </param>
         /// <param name="eventProcessorOptions">
         ///     <see cref="EventProcessorOptions" /> allows custom <see cref="Exception" />
         ///     -handling, among other things, when interfacing with the Event hub
@@ -366,6 +395,7 @@ namespace Daishi.Pluralsight.EventHub
                 BridgeEventProcessorFactory,
                 EventProcessorOptions,
                 Task> registerFunc,
+            bool testMode = false,
             EventProcessorOptions eventProcessorOptions = null)
         {
             if (string.IsNullOrEmpty(hostName))
@@ -392,12 +422,12 @@ namespace Daishi.Pluralsight.EventHub
             {
                 throw new ArgumentNullException(nameof(eventProcessor));
             }
-            if (_eventProcessorHosts.ContainsKey(hostName))
+            if (EventProcessorHosts.ContainsKey(hostName))
             {
                 EventProcessorHost existingEventProcessorHost = null;
                 try
                 {
-                    existingEventProcessorHost = _eventProcessorHosts[hostName];
+                    existingEventProcessorHost = EventProcessorHosts[hostName];
                     await unRegisterFunc(existingEventProcessorHost);
                 }
                 catch (Exception exception)
@@ -409,24 +439,33 @@ namespace Daishi.Pluralsight.EventHub
                         exception);
                 }
             }
-
             try
             {
                 var storageConnectionString =
                     $"DefaultEndpointsProtocol=https;AccountName={storageAccountName}" +
                     $";AccountKey={storageAccountKey}";
 
-                var eventProcessorHost = new EventProcessorHost(
-                    hostName,
-                    eventHubName,
-                    EventHubConsumerGroup.DefaultGroupName,
-                    eventHubConnectionString,
-                    storageConnectionString);
-
+                EventProcessorHost eventProcessorHost = null;
+                try
+                {
+                    eventProcessorHost = new EventProcessorHost(
+                        hostName,
+                        eventHubName,
+                        EventHubConsumerGroup.DefaultGroupName,
+                        eventHubConnectionString,
+                        storageConnectionString);
+                }
+                catch (Exception)
+                {
+                    if (!testMode)
+                    {
+                        throw;
+                    }
+                }
                 var factory = new BridgeEventProcessorFactory(eventProcessor);
 
                 await registerFunc(eventProcessorHost, factory, eventProcessorOptions);
-                _eventProcessorHosts.Add(hostName, eventProcessorHost);
+                EventProcessorHosts.Add(hostName, eventProcessorHost);
             }
             catch (Exception exception)
             {
@@ -451,7 +490,7 @@ namespace Daishi.Pluralsight.EventHub
             if (!IsSubscribedToAny) return;
             var unregisteredHostNames = new List<string>();
 
-            foreach (var eventProcessorHost in _eventProcessorHosts.Values)
+            foreach (var eventProcessorHost in EventProcessorHosts.Values)
             {
                 try
                 {
@@ -467,7 +506,7 @@ namespace Daishi.Pluralsight.EventHub
             }
             foreach (var hostName in unregisteredHostNames)
             {
-                _eventProcessorHosts.Remove(hostName);
+                EventProcessorHosts.Remove(hostName);
             }
         }
 
@@ -485,7 +524,7 @@ namespace Daishi.Pluralsight.EventHub
             if (IsSubscribedToAny)
             {
                 var unregisteredHostNames = new List<string>();
-                foreach (var eventProcessorHost in _eventProcessorHosts.Values)
+                foreach (var eventProcessorHost in EventProcessorHosts.Values)
                 {
                     try
                     {
@@ -501,7 +540,7 @@ namespace Daishi.Pluralsight.EventHub
                 }
                 foreach (var hostName in unregisteredHostNames)
                 {
-                    _eventProcessorHosts.Remove(hostName);
+                    EventProcessorHosts.Remove(hostName);
                 }
             }
         }
@@ -524,8 +563,8 @@ namespace Daishi.Pluralsight.EventHub
             {
                 throw new ArgumentNullException(nameof(hostName));
             }
-            return _eventProcessorHosts != null
-                   && _eventProcessorHosts.ContainsKey(hostName);
+            return EventProcessorHosts != null
+                   && EventProcessorHosts.ContainsKey(hostName);
         }
 
         /// <summary>
