@@ -61,5 +61,3 @@ C:\Users\mooneyp\Documents\GitHub\Daishi.Pluralsight.EventHub\Daishi.Pluralsight
 C:\Users\mooneyp\Documents\GitHub\Daishi.Pluralsight.EventHub\Daishi.Pluralsight.EventHub.Tests\obj\Debug\Daishi.Pluralsight.EventHub.Tests.csprojResolveAssemblyReference.cache
 C:\Users\mooneyp\Documents\GitHub\Daishi.Pluralsight.EventHub\Daishi.Pluralsight.EventHub.Tests\obj\Debug\Daishi.Pluralsight.EventHub.Tests.dll
 C:\Users\mooneyp\Documents\GitHub\Daishi.Pluralsight.EventHub\Daishi.Pluralsight.EventHub.Tests\obj\Debug\Daishi.Pluralsight.EventHub.Tests.pdb
-C:\Users\mooneyp\Documents\GitHub\Daishi.Pluralsight.EventHub\Daishi.Pluralsight.EventHub.Tests\bin\Debug\Daishi.Pluralsight.EventHub.Tests.dll.CodeAnalysisLog.xml
-C:\Users\mooneyp\Documents\GitHub\Daishi.Pluralsight.EventHub\Daishi.Pluralsight.EventHub.Tests\bin\Debug\Daishi.Pluralsight.EventHub.Tests.dll.lastcodeanalysissucceeded
