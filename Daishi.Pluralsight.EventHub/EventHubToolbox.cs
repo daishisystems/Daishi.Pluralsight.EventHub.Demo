@@ -490,18 +490,18 @@ namespace Daishi.Pluralsight.EventHub
             if (!IsSubscribedToAny) return;
             var unregisteredHostNames = new List<string>();
 
-            foreach (var eventProcessorHost in EventProcessorHosts.Values)
+            foreach (var hostName in EventProcessorHosts.Keys)
             {
                 try
                 {
+                    var eventProcessorHost = EventProcessorHosts[hostName];
                     unregisterAction(eventProcessorHost);
-                    unregisteredHostNames.Add(eventProcessorHost.HostName);
+                    unregisteredHostNames.Add(hostName);
                 }
                 catch (Exception exception)
                 {
                     throw new EventHubToolboxException(
-                        $"Unable to un-subscribe from {eventProcessorHost.HostName}.",
-                        exception);
+                        $"Unable to un-subscribe from {hostName}.", exception);
                 }
             }
             foreach (var hostName in unregisteredHostNames)
@@ -524,18 +524,18 @@ namespace Daishi.Pluralsight.EventHub
             if (IsSubscribedToAny)
             {
                 var unregisteredHostNames = new List<string>();
-                foreach (var eventProcessorHost in EventProcessorHosts.Values)
+                foreach (var hostName in EventProcessorHosts.Keys)
                 {
                     try
                     {
+                        var eventProcessorHost = EventProcessorHosts[hostName];
                         await unregisterFunc(eventProcessorHost);
-                        unregisteredHostNames.Add(eventProcessorHost.HostName);
+                        unregisteredHostNames.Add(hostName);
                     }
                     catch (Exception exception)
                     {
                         throw new EventHubToolboxException(
-                            $"Unable to un-subscribe from {eventProcessorHost.HostName}.",
-                            exception);
+                            $"Unable to un-subscribe from {hostName}.", exception);
                     }
                 }
                 foreach (var hostName in unregisteredHostNames)
