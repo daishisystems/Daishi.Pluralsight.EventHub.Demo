@@ -68,6 +68,10 @@ private static void EventProcessorOptions_ExceptionReceived(
     Console.ForegroundColor = ConsoleColor.Green;
 }
 ```
+## Unsubscribe from Event hub
+```cs
+await EventHubToolbox.Instance.UnsubscribeAllAsync(EventHubToolbox.UnRegisterAsync);
+```
 ## Contact the Developer
 Please reach out and contact me for questions, suggestions, or to just talk tech in general.
 
