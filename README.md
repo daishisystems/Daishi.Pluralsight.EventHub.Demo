@@ -68,5 +68,8 @@ private static void EventProcessorOptions_ExceptionReceived(
     Console.ForegroundColor = ConsoleColor.Green;
 }
 ```
-## Contact Me
+## Contact the Developer
 Please reach out and contact me for questions, suggestions, or to just talk tech in general.
+
+
+<a href="http://insidethecpu.com/feed/">![RSS](https://dl.dropboxusercontent.com/u/26042707/rss.png)</a><a href="https://twitter.com/daishisystems">![Twitter](https://dl.dropboxusercontent.com/u/26042707/twitter.png)</a><a href="https://www.linkedin.com/in/daishisystems">![LinkedIn](https://dl.dropboxusercontent.com/u/26042707/linkedin.png)</a><a href="https://plus.google.com/102806071104797194504/posts">![Google+](https://dl.dropboxusercontent.com/u/26042707/g.png)</a><a href="https://www.youtube.com/user/daishisystems">![YouTube](https://dl.dropboxusercontent.com/u/26042707/youtube.png)</a>
