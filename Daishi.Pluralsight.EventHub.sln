@@ -9,6 +9,8 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Daishi.Pluralsight.EventHub
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Daishi.Pluralsight.EventHub.Tests", "Daishi.Pluralsight.EventHub.Tests\Daishi.Pluralsight.EventHub.Tests.csproj", "{D58B60E9-6D44-4AB5-88C9-CF9FAE934646}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Daishi.Pluralsight.EventHub.WebTrafficGenerator", "Daishi.Pluralsight.EventHub.WebTrafficGenerator\Daishi.Pluralsight.EventHub.WebTrafficGenerator.csproj", "{CF3BB9E5-912F-4FBC-9AF6-5210F86ECC3F}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -27,6 +29,10 @@ Global
 		{D58B60E9-6D44-4AB5-88C9-CF9FAE934646}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{D58B60E9-6D44-4AB5-88C9-CF9FAE934646}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{D58B60E9-6D44-4AB5-88C9-CF9FAE934646}.Release|Any CPU.Build.0 = Release|Any CPU
+		{CF3BB9E5-912F-4FBC-9AF6-5210F86ECC3F}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{CF3BB9E5-912F-4FBC-9AF6-5210F86ECC3F}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{CF3BB9E5-912F-4FBC-9AF6-5210F86ECC3F}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{CF3BB9E5-912F-4FBC-9AF6-5210F86ECC3F}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

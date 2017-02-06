@@ -474,8 +474,6 @@ namespace Daishi.Pluralsight.EventHub
             }
         }
 
-        // todo: Graphics, animations, blog post.
-
         /// <summary>
         ///     <see cref="UnsubscribeAll" /> resets the lease on all
         ///     currently subscribed-to Event Hub partition(s), if any.
