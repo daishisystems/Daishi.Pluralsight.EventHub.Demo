@@ -635,6 +635,8 @@ namespace Daishi.Pluralsight.EventHub
         ///     abstracts the <see cref="EventProcessorHost" /> un-register process outside
         ///     of this method, in order to facilitate unit-testing.
         /// </param>
+        /// <exception cref="ArgumentNullException"></exception>
+        /// <exception cref="EventHubToolboxException"></exception>
         public void UnSubscribe(
             string eventProcessorHostName,
             Action<EventProcessorHost> unregisterAction)
@@ -656,6 +658,53 @@ namespace Daishi.Pluralsight.EventHub
                         $"No subscription to {eventProcessorHostName} exists.");
                 }
                 unregisterAction(eventProcessorHost);
+                EventProcessorHosts.Remove(eventProcessorHostName);
+            }
+            catch (Exception exception)
+            {
+                throw new EventHubToolboxException(
+                    $"Unable to un-subscribe from {eventProcessorHostName}.", exception);
+            }
+        }
+
+        /// <summary>
+        ///     <see cref="UnSubscribeAsync" /> asynchronously resets the lease on
+        ///     <see cref="eventProcessorHostName" />, if it is subscribed to an Event Hub
+        ///     partition.
+        /// </summary>
+        /// <param name="eventProcessorHostName">
+        ///     <see cref="eventProcessorHostName" /> is
+        ///     the name of the <see cref="EventProcessorHost" /> from which this instance
+        ///     will un-subscribe.
+        /// </param>
+        /// <param name="unregisterFunc">
+        ///     <see cref="unregisterFunc" /> is a function that
+        ///     abstracts the <see cref="EventProcessorHost" /> un-register process outside
+        ///     of this method, in order to facilitate unit-testing.
+        /// </param>
+        /// <exception cref="ArgumentNullException"></exception>
+        /// <exception cref="EventHubToolboxException"></exception>
+        public async Task UnSubscribeAsync(
+            string eventProcessorHostName,
+            Func<EventProcessorHost, Task> unregisterFunc)
+        {
+            if (string.IsNullOrEmpty(eventProcessorHostName))
+            {
+                throw new ArgumentNullException(nameof(eventProcessorHostName));
+            }
+            try
+            {
+                EventProcessorHost eventProcessorHost;
+                var isSubscribed = EventProcessorHosts.TryGetValue(
+                    eventProcessorHostName,
+                    out eventProcessorHost);
+
+                if (!isSubscribed)
+                {
+                    throw new EventHubToolboxException(
+                        $"No subscription to {eventProcessorHostName} exists.");
+                }
+                await unregisterFunc(eventProcessorHost);
                 EventProcessorHosts.Remove(eventProcessorHostName);
             }
             catch (Exception exception)

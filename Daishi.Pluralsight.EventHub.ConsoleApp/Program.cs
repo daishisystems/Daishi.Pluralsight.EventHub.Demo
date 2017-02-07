@@ -43,6 +43,8 @@ namespace Daishi.Pluralsight.EventHub.ConsoleApp
             var eventProcessorOptions = new EventProcessorOptions();
             eventProcessorOptions.ExceptionReceived += EventProcessorOptions_ExceptionReceived;
 
+            var eventProcessorHostName = "MyEventHost";
+
             await EventHubToolbox.Instance.SubscribeAsync(
                 "MyEventHost",
                 eventHubConnectionStringShort,
@@ -72,7 +74,9 @@ namespace Daishi.Pluralsight.EventHub.ConsoleApp
             await EventHubToolbox.Instance.SendBatchAsync(events);
 
             Console.ReadLine();
-            await EventHubToolbox.Instance.UnsubscribeAllAsync(EventHubToolbox.UnRegisterAsync);
+            await EventHubToolbox.Instance.UnSubscribeAsync(
+                eventProcessorHostName,
+                EventHubToolbox.UnRegisterAsync);
             Console.ReadLine();
         }
 
