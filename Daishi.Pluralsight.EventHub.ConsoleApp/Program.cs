@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.Configuration;
 using System.Threading.Tasks;
 using Microsoft.ServiceBus.Messaging;
@@ -60,6 +61,15 @@ namespace Daishi.Pluralsight.EventHub.ConsoleApp
             }
 
             await EventHubToolbox.Instance.SendAsync("TEST");
+
+            var events = new List<string>
+            {
+                "Event1",
+                "EVent2"
+            };
+
+            EventHubToolbox.Instance.SendBatch(events);
+            await EventHubToolbox.Instance.SendBatchAsync(events);
 
             Console.ReadLine();
             await EventHubToolbox.Instance.UnsubscribeAllAsync(EventHubToolbox.UnRegisterAsync);
