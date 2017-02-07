@@ -70,11 +70,20 @@ namespace Daishi.Pluralsight.EventHub {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to Unable to send message to Event hub..
+        ///   Looks up a localized string similar to Unable to send event to Event hub..
         /// </summary>
-        internal static string UnableToSendMessage {
+        internal static string UnableToSendEvent {
             get {
-                return ResourceManager.GetString("UnableToSendMessage", resourceCulture);
+                return ResourceManager.GetString("UnableToSendEvent", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Unable to send events to Event hub..
+        /// </summary>
+        internal static string UnableToSendEvents {
+            get {
+                return ResourceManager.GetString("UnableToSendEvents", resourceCulture);
             }
         }
         

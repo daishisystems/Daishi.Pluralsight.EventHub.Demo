@@ -120,8 +120,11 @@
   <data name="ConnectionFailed" xml:space="preserve">
     <value>Could not establish a connection to Event Hub.</value>
   </data>
-  <data name="UnableToSendMessage" xml:space="preserve">
-    <value>Unable to send message to Event hub.</value>
+  <data name="UnableToSendEvent" xml:space="preserve">
+    <value>Unable to send event to Event hub.</value>
+  </data>
+  <data name="UnableToSendEvents" xml:space="preserve">
+    <value>Unable to send events to Event hub.</value>
   </data>
   <data name="Uninitialized" xml:space="preserve">
     <value>Uninitialized EventHubClient instance.</value>

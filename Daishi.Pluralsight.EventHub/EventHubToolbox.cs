@@ -70,16 +70,16 @@ namespace Daishi.Pluralsight.EventHub
         }
 
         /// <summary>
-        ///     <see cref="Send" /> publishes <see cref="message" /> to an Event Hub, if
+        ///     <see cref="Send" /> publishes <see cref="@event" /> to an Event Hub, if
         ///     connected.
         /// </summary>
-        /// <param name="message">
-        ///     <see cref="message" /> is the message that will be published to the Event
+        /// <param name="event">
+        ///     <see cref="@event" /> is the event to be published to the Event
         ///     Hub.
         /// </param>
         /// <exception cref="ArgumentNullException">
         ///     <see cref="ArgumentNullException" /> is
-        ///     thrown when <see cref="message" /> is invalid.
+        ///     thrown when <see cref="@event" /> is invalid.
         /// </exception>
         /// <exception cref="ArgumentException">
         ///     <see cref="ArgumentException" /> is thrown when no valid connection to
@@ -87,13 +87,13 @@ namespace Daishi.Pluralsight.EventHub
         /// </exception>
         /// <exception cref="EventHubToolboxException">
         ///     <see cref="EventHubToolboxException" /> is thrown when
-        ///     <see cref="message" /> cannot be published to an Event Hub instance.
+        ///     <see cref="@event" /> cannot be published to an Event Hub instance.
         /// </exception>
-        public void Send(string message)
+        public void Send(string @event)
         {
-            if (string.IsNullOrEmpty(message))
+            if (string.IsNullOrEmpty(@event))
             {
-                throw new ArgumentNullException(nameof(message));
+                throw new ArgumentNullException(nameof(@event));
             }
             if (_eventHubClient == null || _eventHubClient.IsClosed)
             {
@@ -104,28 +104,28 @@ namespace Daishi.Pluralsight.EventHub
             try
             {
                 _eventHubClient.Send(
-                    new EventData(Encoding.UTF8.GetBytes(message)));
+                    new EventData(Encoding.UTF8.GetBytes(@event)));
             }
             catch (Exception exception)
             {
                 throw new EventHubToolboxException(
-                    ErrorMessageResources.UnableToSendMessage,
+                    ErrorMessageResources.UnableToSendEvent,
                     exception);
             }
         }
 
         /// <summary>
-        ///     <see cref="SendAsync" /> asynchronously publishes <see cref="message" /> to
+        ///     <see cref="SendAsync" /> asynchronously publishes <see cref="@event" /> to
         ///     an
         ///     Event Hub, if connected.
         /// </summary>
-        /// <param name="message">
-        ///     <see cref="message" /> is the message that will be published to the Event
+        /// <param name="event">
+        ///     <see cref="@event" /> is the event to be published to the Event
         ///     Hub.
         /// </param>
         /// <exception cref="ArgumentNullException">
         ///     <see cref="ArgumentNullException" /> is
-        ///     thrown when <see cref="message" /> is invalid.
+        ///     thrown when <see cref="@event" /> is invalid.
         /// </exception>
         /// <exception cref="ArgumentException">
         ///     <see cref="ArgumentException" /> is thrown when no valid connection to
@@ -133,13 +133,13 @@ namespace Daishi.Pluralsight.EventHub
         /// </exception>
         /// <exception cref="EventHubToolboxException">
         ///     <see cref="EventHubToolboxException" /> is thrown when
-        ///     <see cref="message" /> cannot be published to an Event Hub instance.
+        ///     <see cref="@event" /> cannot be published to an Event Hub instance.
         /// </exception>
-        public async Task SendAsync(string message)
+        public async Task SendAsync(string @event)
         {
-            if (string.IsNullOrEmpty(message))
+            if (string.IsNullOrEmpty(@event))
             {
-                throw new ArgumentNullException(nameof(message));
+                throw new ArgumentNullException(nameof(@event));
             }
             if (_eventHubClient == null || _eventHubClient.IsClosed)
             {
@@ -150,12 +150,89 @@ namespace Daishi.Pluralsight.EventHub
             try
             {
                 await _eventHubClient.SendAsync(
-                    new EventData(Encoding.UTF8.GetBytes(message)));
+                    new EventData(Encoding.UTF8.GetBytes(@event)));
             }
             catch (Exception exception)
             {
                 throw new EventHubToolboxException(
-                    ErrorMessageResources.UnableToSendMessage,
+                    ErrorMessageResources.UnableToSendEvent,
+                    exception);
+            }
+        }
+
+        /// <summary>
+        ///     <see cref="SendBatch" /> publishes <see cref="events" /> to
+        ///     an
+        ///     Event Hub, if connected.
+        /// </summary>
+        /// <param name="events">
+        ///     <see cref="events" /> is the event collection to be
+        ///     published to the Event Hub.
+        /// </param>
+        public void SendBatch(IEnumerable<string> events)
+        {
+            if (events == null)
+            {
+                throw new ArgumentNullException(nameof(events));
+            }
+            if (_eventHubClient == null || _eventHubClient.IsClosed)
+            {
+                throw new ArgumentException(
+                    ErrorMessageResources.Uninitialized,
+                    nameof(_eventHubClient));
+            }
+            try
+            {
+                var eventDataList = new List<EventData>();
+                foreach (var @event in events)
+                {
+                    eventDataList.Add(new EventData(Encoding.UTF8.GetBytes(@event)));
+                }
+                _eventHubClient.SendBatch(eventDataList);
+            }
+            catch (Exception exception)
+            {
+                throw new EventHubToolboxException(
+                    ErrorMessageResources.UnableToSendEvents,
+                    exception);
+            }
+        }
+
+        /// <summary>
+        ///     <see cref="SendBatchAsync" /> asynchronously publishes
+        ///     <see cref="events" /> to
+        ///     an
+        ///     Event Hub, if connected.
+        /// </summary>
+        /// <param name="events">
+        ///     <see cref="events" /> is the event collection to be
+        ///     published to the Event Hub.
+        /// </param>
+        public async Task SendBatchAsync(IEnumerable<string> events)
+        {
+            if (events == null)
+            {
+                throw new ArgumentNullException(nameof(events));
+            }
+            if (_eventHubClient == null || _eventHubClient.IsClosed)
+            {
+                throw new ArgumentException(
+                    ErrorMessageResources.Uninitialized,
+                    nameof(_eventHubClient));
+            }
+            try
+            {
+                var eventDataList = new List<EventData>();
+                foreach (var @event in events)
+                {
+                    eventDataList.Add(new EventData(Encoding.UTF8.GetBytes(@event)));
+                }
+                await _eventHubClient.SendBatchAsync(eventDataList);
+            }
+            catch (Exception exception)
+            {
+                throw new EventHubToolboxException(
+                    ErrorMessageResources.UnableToSendEvents,
                     exception);
             }
         }
