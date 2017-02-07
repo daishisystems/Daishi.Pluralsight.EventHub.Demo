@@ -33,7 +33,7 @@ namespace Daishi.Pluralsight.EventHub.Tests
         }
 
         [TestMethod]
-        public void UnRegisterClearsAllManagedEventProcessorHostInstances()
+        public void UnSubscribeClearsAllManagedEventProcessorHostInstances()
         {
             EventHubToolbox.Instance.Subscribe(
                 "HOSTNAME",
@@ -50,6 +50,29 @@ namespace Daishi.Pluralsight.EventHub.Tests
                 true);
 
             EventHubToolbox.Instance.UnsubscribeAll(eventProcessorHost => { });
+            Assert.AreEqual(0, EventHubToolbox.Instance.EventProcessorHosts.Count);
+        }
+
+        [TestMethod]
+        public void UnSubscribeRemovesEventProcessorHost()
+        {
+            var eventProcessorHostName = "HOSTNAME";
+
+            EventHubToolbox.Instance.Subscribe(
+                eventProcessorHostName,
+                "CONNECTIONSTRING",
+                "EVENTHUBNAME",
+                "STORAGEACCOUNTNAME",
+                "STORAGEACCOUNTKEY",
+                new EventReceiver(TimeSpan.MinValue),
+                host => { },
+                (host,
+                    factory,
+                    options) =>
+                { },
+                true);
+
+            EventHubToolbox.Instance.UnSubscribe(eventProcessorHostName, host => { });
             Assert.AreEqual(0, EventHubToolbox.Instance.EventProcessorHosts.Count);
         }
     }

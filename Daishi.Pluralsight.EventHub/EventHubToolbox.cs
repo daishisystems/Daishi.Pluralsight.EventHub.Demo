@@ -621,6 +621,51 @@ namespace Daishi.Pluralsight.EventHub
         }
 
         /// <summary>
+        ///     <see cref="UnSubscribe" /> resets the lease on
+        ///     <see cref="eventProcessorHostName" />, if it is subscribed to an Event Hub
+        ///     partition.
+        /// </summary>
+        /// <param name="eventProcessorHostName">
+        ///     <see cref="eventProcessorHostName" /> is
+        ///     the name of the <see cref="EventProcessorHost" /> from which this instance
+        ///     will un-subscribe.
+        /// </param>
+        /// <param name="unregisterAction">
+        ///     <see cref="unregisterAction" /> is a function that
+        ///     abstracts the <see cref="EventProcessorHost" /> un-register process outside
+        ///     of this method, in order to facilitate unit-testing.
+        /// </param>
+        public void UnSubscribe(
+            string eventProcessorHostName,
+            Action<EventProcessorHost> unregisterAction)
+        {
+            if (string.IsNullOrEmpty(eventProcessorHostName))
+            {
+                throw new ArgumentNullException(nameof(eventProcessorHostName));
+            }
+            try
+            {
+                EventProcessorHost eventProcessorHost;
+                var isSubscribed = EventProcessorHosts.TryGetValue(
+                    eventProcessorHostName,
+                    out eventProcessorHost);
+
+                if (!isSubscribed)
+                {
+                    throw new EventHubToolboxException(
+                        $"No subscription to {eventProcessorHostName} exists.");
+                }
+                unregisterAction(eventProcessorHost);
+                EventProcessorHosts.Remove(eventProcessorHostName);
+            }
+            catch (Exception exception)
+            {
+                throw new EventHubToolboxException(
+                    $"Unable to un-subscribe from {eventProcessorHostName}.", exception);
+            }
+        }
+
+        /// <summary>
         ///     <see cref="IsSubscribedTo" /> returns <c>true</c> if
         ///     <see cref="hostName" /> is currently subscribed-to.
         /// </summary>
