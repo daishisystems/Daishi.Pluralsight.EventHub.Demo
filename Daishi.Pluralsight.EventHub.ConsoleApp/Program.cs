@@ -43,7 +43,7 @@ namespace Daishi.Pluralsight.EventHub.ConsoleApp
             var eventProcessorOptions = new EventProcessorOptions();
             eventProcessorOptions.ExceptionReceived += EventProcessorOptions_ExceptionReceived;
 
-            var eventProcessorHostName = "MyEventHost";
+            const string eventProcessorHostName = "MyEventHost";
 
             await EventHubToolbox.Instance.SubscribeAsync(
                 "MyEventHost",
