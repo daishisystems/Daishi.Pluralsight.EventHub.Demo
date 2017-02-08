@@ -3,10 +3,10 @@
 namespace Daishi.Pluralsight.EventHub
 {
     /// <summary>
-    ///     <see cref="WebTrafficEvent" /> is an event that contains metadata
+    ///     <see cref="SimulatedHttpRequest" /> is an event that contains metadata
     ///     originating from a simulated, up-stream web application.
     /// </summary>
-    public class WebTrafficEvent
+    public class SimulatedHttpRequest
     {
         /// <summary>
         ///     <see cref="IpAddress" /> is the IPv4 address associated with an up-stream
@@ -47,16 +47,16 @@ namespace Daishi.Pluralsight.EventHub
 
         /// <summary>
         ///     <see cref="GenerateRandom" /> returns a randomly-generated
-        ///     <see cref="WebTrafficEvent" /> instance.
+        ///     <see cref="SimulatedHttpRequest" /> instance.
         /// </summary>
         /// <param name="random">
         ///     <see cref="Random" /> is a <see cref="Random" /> instance
-        ///     used to generate <see cref="WebTrafficEvent" /> properties.
+        ///     used to generate <see cref="SimulatedHttpRequest" /> properties.
         /// </param>
-        /// <returns>A randomly-generated <see cref="WebTrafficEvent" /> instance.</returns>
-        public static WebTrafficEvent GenerateRandom(Random random)
+        /// <returns>A randomly-generated <see cref="SimulatedHttpRequest" /> instance.</returns>
+        public static SimulatedHttpRequest GenerateRandom(Random random)
         {
-            return new WebTrafficEvent
+            return new SimulatedHttpRequest
             {
                 IpAddress = GenerateRandomIpAddress(random),
                 Device = GenerateRandomDevice(random),
