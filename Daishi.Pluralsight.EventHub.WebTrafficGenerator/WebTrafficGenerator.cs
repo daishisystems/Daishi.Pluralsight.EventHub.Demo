@@ -12,20 +12,21 @@ namespace Daishi.Pluralsight.EventHub.WebTrafficGenerator
     internal class WebTrafficGenerator
     {
         /// <summary>
-        ///     <see cref="EventHandler" /> is a function-pointer that facilitates the
-        ///     <see cref="WebTrafficGenerator.SimulatedHttpRequestPublished" /> event.
+        ///     <see cref="SimulatedHttpRequestPublishedEventHandler" /> is a
+        ///     function-pointer that facilitates
+        ///     <see cref="WebTrafficGenerator.SimulatedHttpRequestPublished" />.
         /// </summary>
         /// <param name="sender"></param>
         /// <param name="e"></param>
-        public delegate void EventHandler(
+        public delegate void SimulatedHttpRequestPublishedEventHandler(
             object sender,
-            WebTrafficGeneratorEventArgs e);
+            SimulatedHttpRequestPublishedEventArgs e);
 
         /// <summary>
         ///     <see cref="SimulatedHttpRequestPublished" /> is raised when a
         ///     <see cref="SimulatedHttpRequest" /> is published to Event Hub.
         /// </summary>
-        public event EventHandler SimulatedHttpRequestPublished;
+        public event SimulatedHttpRequestPublishedEventHandler SimulatedHttpRequestPublished;
 
         /// <summary>
         ///     <see cref="Generate" /> instantiates
@@ -54,7 +55,7 @@ namespace Daishi.Pluralsight.EventHub.WebTrafficGenerator
                 var eventPayload = JsonConvert.SerializeObject(webTrafficEvent);
 
                 EventHubToolbox.Instance.Send(eventPayload);
-                OnSimulatedHttpRequestPublished(new WebTrafficGeneratorEventArgs
+                OnSimulatedHttpRequestPublished(new SimulatedHttpRequestPublishedEventArgs
                 {
                     IpAddress = webTrafficEvent.IpAddress,
                     NumSimulatedHttpRequests = i + 1
@@ -94,15 +95,17 @@ namespace Daishi.Pluralsight.EventHub.WebTrafficGenerator
 
         /// <summary>
         ///     <see cref="OnSimulatedHttpRequestPublished" /> invokes any subscribers to
-        ///     <see cref="WebTrafficGenerator.SimulatedHttpRequestPublished" />.
+        ///     <see cref="SimulatedHttpRequestPublished" />.
         /// </summary>
         /// <param name="e">
         ///     <see cref="e" /> is the
-        ///     <see cref="WebTrafficGeneratorEventArgs" /> instance containing metadata
+        ///     <see cref="SimulatedHttpRequestPublishedEventArgs" /> instance containing
+        ///     metadata
         ///     pertaining to the
         ///     <see cref="WebTrafficGenerator.SimulatedHttpRequestPublished" /> event.
         /// </param>
-        protected virtual void OnSimulatedHttpRequestPublished(WebTrafficGeneratorEventArgs e)
+        protected virtual void OnSimulatedHttpRequestPublished(
+            SimulatedHttpRequestPublishedEventArgs e)
         {
             SimulatedHttpRequestPublished?.Invoke(this, e);
         }

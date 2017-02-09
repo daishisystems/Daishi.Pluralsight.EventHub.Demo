@@ -53,7 +53,7 @@ namespace Daishi.Pluralsight.EventHub.WebTrafficGenerator
 
         private static void WebTrafficGenerator_SimulatedHttpRequestPublished(
             object sender,
-            WebTrafficGeneratorEventArgs e)
+            SimulatedHttpRequestPublishedEventArgs e)
         {
             Console.Clear();
             Console.WriteLine(@"Press Ctrl-C to stop the sender process");

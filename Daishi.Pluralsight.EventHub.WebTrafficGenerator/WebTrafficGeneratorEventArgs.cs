@@ -3,10 +3,11 @@
 namespace Daishi.Pluralsight.EventHub.WebTrafficGenerator
 {
     /// <summary>
-    ///     <see cref="WebTrafficGeneratorEventArgs" /> instances are marshaled through
-    ///     events invoked by <see cref="WebTrafficGenerator" /> instances.
+    ///     <see cref="SimulatedHttpRequestPublishedEventArgs" /> instances are
+    ///     marshaled through
+    ///     <see cref="WebTrafficGenerator.SimulatedHttpRequestPublished" /> events.
     /// </summary>
-    internal class WebTrafficGeneratorEventArgs : EventArgs
+    internal class SimulatedHttpRequestPublishedEventArgs : EventArgs
     {
         /// <summary>
         ///     <see cref="NumSimulatedHttpRequests" /> is the current count of
