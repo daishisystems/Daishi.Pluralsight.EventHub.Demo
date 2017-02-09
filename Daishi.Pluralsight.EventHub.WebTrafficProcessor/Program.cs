@@ -41,7 +41,7 @@ namespace Daishi.Pluralsight.EventHub.WebTrafficProcessor
                 eventProcessorOptions.ExceptionReceived += EventProcessorOptions_ExceptionReceived;
 
                 EventHubToolbox.Instance.Subscribe(
-                    "Pluralsight Demo",
+                    Guid.NewGuid().ToString(),
                     eventHubConnectionString,
                     eventHubName,
                     storageAccountName,
@@ -65,6 +65,10 @@ namespace Daishi.Pluralsight.EventHub.WebTrafficProcessor
                 if (exception.InnerException != null)
                 {
                     Console.WriteLine(exception.InnerException.Message);
+                    if (exception.InnerException.InnerException != null)
+                    {
+                        Console.WriteLine(exception.InnerException.InnerException.Message);
+                    }
                 }
                 Console.ReadLine();
             }
@@ -87,12 +91,15 @@ namespace Daishi.Pluralsight.EventHub.WebTrafficProcessor
             object sender,
             ExceptionReceivedEventArgs e)
         {
-            Console.Clear();
             Console.ForegroundColor = ConsoleColor.Red;
             Console.WriteLine(e.Exception.Message);
             if (e.Exception.InnerException != null)
             {
                 Console.WriteLine(e.Exception.InnerException.Message);
+                if (e.Exception.InnerException.InnerException != null)
+                {
+                    Console.WriteLine(e.Exception.InnerException.InnerException.Message);
+                }
             }
             Console.ReadLine();
         }
