@@ -27,7 +27,7 @@ namespace Daishi.Pluralsight.EventHub.WebTrafficProcessor
                     ConfigurationManager.AppSettings["StorageAccountKey"];
 
                 var eventReceiver = new EventReceiver(TimeSpan.FromMinutes(5));
-                eventReceiver.Notification += EventReceiver_Notification;
+                eventReceiver.NotificationReceived += EventReceiver_NotificationReceived;
                 eventReceiver.EventReceived += EventReceiver_EventReceived;
 
                 var eventProcessorOptions = new EventProcessorOptions();
@@ -63,6 +63,19 @@ namespace Daishi.Pluralsight.EventHub.WebTrafficProcessor
             }
         }
 
+        private static void EventReceiver_NotificationReceived(
+            object sender,
+            NotificationReceivedEventArgs e)
+        {
+            if (!(e.NotificationSource.HasFlag(NotificationSource.Open) |
+                  e.NotificationSource.HasFlag(NotificationSource.Close))) return;
+
+            Console.ForegroundColor = ConsoleColor.Yellow;
+            Console.WriteLine($"Notification: {e.Notificaction}");
+            Console.WriteLine($"Partition: {e.PartitionId}");
+            Console.WriteLine($"Source: {e.NotificationSource}");
+        }
+
         private static void EventProcessorOptions_ExceptionReceived(
             object sender,
             ExceptionReceivedEventArgs e)
@@ -79,18 +92,10 @@ namespace Daishi.Pluralsight.EventHub.WebTrafficProcessor
 
         private static void EventReceiver_EventReceived(
             object sender,
-            EventReceiverEventArgs e)
+            EventReceivedEventArgs e)
         {
-            Console.WriteLine($"Event received: {e.Message}");
-        }
-
-        private static void EventReceiver_Notification(
-            object sender,
-            EventReceiverEventArgs e)
-        {
-            // todo: Include PartitionId, Source (Close/Open).
-            //Console.ForegroundColor = ConsoleColor.Green;
-            //Console.WriteLine($"Notification received: {e.Message}");
+            Console.ForegroundColor = ConsoleColor.Green;
+            Console.WriteLine($"Event received: {e.Event} on partition {e.PartitionId}.");
         }
     }
 }

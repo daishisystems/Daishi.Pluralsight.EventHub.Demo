@@ -15,15 +15,26 @@ namespace Daishi.Pluralsight.EventHub
     public sealed class EventReceiver : IEventProcessor
     {
         /// <summary>
-        ///     <see cref="EventHandler" /> is a function pointer that facilitates both
-        ///     <see cref="EventReceiver.EventReceived" /> and
-        ///     <see cref="Notification" /> events.
+        ///     <see cref="EventReceivedEventHandler" /> is a function pointer that
+        ///     facilitates
+        ///     <see cref="EventReceived" />.
         /// </summary>
-        /// <param name="sender">The instance that invoked the event.</param>
-        /// <param name="e">The <see cref="EventReceiverEventArgs" /> instance.</param>
-        public delegate void EventHandler(
+        /// <param name="sender">The <see cref="object" /> that invoked the event.</param>
+        /// <param name="e">The <see cref="EventReceivedEventArgs" /> instance.</param>
+        public delegate void EventReceivedEventHandler(
             object sender,
-            EventReceiverEventArgs e);
+            EventReceivedEventArgs e);
+
+        /// <summary>
+        ///     <see cref="NotificactionReceivedEventHandler" /> is a function pointer that
+        ///     facilitates
+        ///     <see cref="NotificationReceived" />.
+        /// </summary>
+        /// <param name="sender">The <see cref="object" /> that invoked the event.</param>
+        /// <param name="e">The <see cref="EventReceivedEventArgs" /> instance.</param>
+        public delegate void NotificactionReceivedEventHandler(
+            object sender,
+            NotificationReceivedEventArgs e);
 
         private readonly TimeSpan _checkPointInterval;
 
@@ -56,11 +67,11 @@ namespace Daishi.Pluralsight.EventHub
             {
                 await context.CheckpointAsync();
             }
-            OnNotification(new EventReceiverEventArgs
+            OnNotification(new NotificationReceivedEventArgs
             {
-                Message = "Event Receiver Shut-down. " +
-                          $"Partition: '{context.Lease.PartitionId}', " +
-                          $"Reason: '{reason}'."
+                Notificaction = $"Event Hub connection closed: {reason}",
+                NotificationSource = NotificationSource.Close,
+                PartitionId = context.Lease.PartitionId
             });
         }
 
@@ -78,11 +89,11 @@ namespace Daishi.Pluralsight.EventHub
             _checkpointStopWatch = new Stopwatch();
             _checkpointStopWatch.Start();
 
-            OnNotification(new EventReceiverEventArgs
+            OnNotification(new NotificationReceivedEventArgs
             {
-                Message = "Event Receiver initialized. " +
-                          $"Partition: '{context.Lease.PartitionId}', " +
-                          $"Offset: '{context.Lease.Offset}'."
+                Notificaction = "Event Hub connection established.",
+                NotificationSource = NotificationSource.Open,
+                PartitionId = context.Lease.PartitionId
             });
             return Task.FromResult<object>(null);
         }
@@ -104,7 +115,8 @@ namespace Daishi.Pluralsight.EventHub
         /// <returns><see cref="Task{TResult}" /> (an empty async response).</returns>
         /// <remarks>
         ///     <see cref="IEventProcessor.ProcessEventsAsync" /> raises
-        ///     <see cref="Notification" /> and <see cref="EventReceived" /> events.
+        ///     <see cref="NotificationReceived" /> and <see cref="EventReceived" />
+        ///     events.
         /// </remarks>
         public async Task ProcessEventsAsync(PartitionContext context,
             IEnumerable<EventData> messages)
@@ -112,15 +124,16 @@ namespace Daishi.Pluralsight.EventHub
             foreach (var @event in messages
                 .Select(eventData => Encoding.UTF8.GetString(eventData.GetBytes())))
             {
-                OnEventReceived(new EventReceiverEventArgs
+                OnEventReceived(new EventReceivedEventArgs
                 {
-                    Message = @event
+                    Event = @event,
+                    PartitionId = context.Lease.PartitionId
                 });
-                OnNotification(new EventReceiverEventArgs
+                OnNotification(new NotificationReceivedEventArgs
                 {
-                    Message = "Message received. " +
-                              $"Partition: '{context.Lease.PartitionId}', " +
-                              $"Data: '{@event}'."
+                    Notificaction = "Event received.",
+                    NotificationSource = NotificationSource.ProcessEvents,
+                    PartitionId = context.Lease.PartitionId
                 });
             }
             if (_checkpointStopWatch.Elapsed > _checkPointInterval)
@@ -131,30 +144,29 @@ namespace Daishi.Pluralsight.EventHub
         }
 
         /// <summary>
-        ///     <see cref="Notification" /> is raised when an event is downloaded from an
-        ///     Event Hub partition. This is a notification mechanism only, and does not
-        ///     contain information pertaining to the event itself.
+        ///     <see cref="NotificationReceived" /> is raised when an operational event of
+        ///     interest occurs during this instance' life-cycle.
         /// </summary>
-        public event EventHandler Notification;
+        public event NotificactionReceivedEventHandler NotificationReceived;
 
         /// <summary>
         ///     <see cref="EventReceived" /> is raised when an event is downloaded from
         ///     an Event Hub partition, and contains the event itself in serialised,
         ///     UTF-8-format.
         /// </summary>
-        public event EventHandler EventReceived;
+        public event EventReceivedEventHandler EventReceived;
 
         /// <summary>
         ///     <see cref="OnNotification" /> invokes any subscribers to
-        ///     <see cref="Notification" />.
+        ///     <see cref="NotificationReceived" />.
         /// </summary>
         /// <param name="e">
-        ///     <see cref="e" /> is an <see cref="EventReceiverEventArgs" />
-        ///     instance containing a notification message.
+        ///     <see cref="e" /> is an <see cref="NotificationReceivedEventArgs" />
+        ///     instance containing a notification metadata.
         /// </param>
-        private void OnNotification(EventReceiverEventArgs e)
+        private void OnNotification(NotificationReceivedEventArgs e)
         {
-            Notification?.Invoke(this, e);
+            NotificationReceived?.Invoke(this, e);
         }
 
         /// <summary>
@@ -162,10 +174,10 @@ namespace Daishi.Pluralsight.EventHub
         ///     <see cref="EventReceived" />.
         /// </summary>
         /// <param name="e">
-        ///     <see cref="e" /> is an <see cref="EventReceiverEventArgs" />
-        ///     instance containing the event itself in serialised, UTF-8-format.
+        ///     <see cref="e" /> is an <see cref="EventReceivedEventArgs" />
+        ///     instance containing event metadata.
         /// </param>
-        private void OnEventReceived(EventReceiverEventArgs e)
+        private void OnEventReceived(EventReceivedEventArgs e)
         {
             EventReceived?.Invoke(this, e);
         }

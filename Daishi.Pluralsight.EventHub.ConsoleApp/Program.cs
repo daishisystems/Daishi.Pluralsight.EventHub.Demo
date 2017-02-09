@@ -37,8 +37,8 @@ namespace Daishi.Pluralsight.EventHub.ConsoleApp
                 ConfigurationManager.AppSettings["StorageAccountKey"];
 
             var eventReceiver = new EventReceiver(TimeSpan.FromMinutes(5));
-            eventReceiver.Notification += EventReceiver_Notification;
-            eventReceiver.EventReceived += EventReceiverEventReceived;
+            eventReceiver.NotificationReceived += EventReceiver_NotificationReceived;
+            eventReceiver.EventReceived += EventReceiver_EventReceived;
 
             var eventProcessorOptions = new EventProcessorOptions();
             eventProcessorOptions.ExceptionReceived += EventProcessorOptions_ExceptionReceived;
@@ -80,16 +80,18 @@ namespace Daishi.Pluralsight.EventHub.ConsoleApp
             Console.ReadLine();
         }
 
-        private static void EventReceiver_Notification(object sender,
-            EventReceiverEventArgs e)
+        private static void EventReceiver_EventReceived(object sender,
+            EventReceivedEventArgs e)
         {
-            Console.WriteLine(@"Notification received: {0}", e.Message);
+            Console.WriteLine(@"Event received: {0}", e.Event);
         }
 
-        private static void EventReceiverEventReceived(object sender,
-            EventReceiverEventArgs e)
+        private static void EventReceiver_NotificationReceived(
+            object sender,
+            NotificationReceivedEventArgs e)
         {
-            Console.WriteLine(@"Event received: {0}", e.Message);
+            Console.WriteLine(@"Notification received: {0}\r\nPartition: {1}",
+                e.Notificaction, e.PartitionId);
         }
 
         private static void EventProcessorOptions_ExceptionReceived(
