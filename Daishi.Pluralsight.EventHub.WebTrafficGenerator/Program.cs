@@ -5,7 +5,6 @@ namespace Daishi.Pluralsight.EventHub.WebTrafficGenerator
 {
     internal class Program
     {
-        // todo: Simple pub/sub style diagram depicting a simple event flowing from system A to B.
         private static void Main(string[] args)
         {
             Console.ForegroundColor = ConsoleColor.Cyan;
