@@ -6,8 +6,15 @@ namespace Daishi.Pluralsight.EventHub.WebTrafficProcessor
 {
     internal class Program
     {
+        private static volatile int _eventCount;
+        private static DateTime _startTime;
+        private static double _elapsedTime;
+        private static int _totalNumExpectedEvents;
+
         private static void Main(string[] args)
         {
+            _totalNumExpectedEvents =
+                int.Parse(ConfigurationManager.AppSettings["TotalNumExpectedEvents"]);
             Console.ForegroundColor = ConsoleColor.Green;
             Console.WriteLine(@"Press Ctrl-C to stop the processor.");
             Console.WriteLine(@"Press Enter to start now...");
@@ -96,6 +103,16 @@ namespace Daishi.Pluralsight.EventHub.WebTrafficProcessor
         {
             Console.ForegroundColor = ConsoleColor.Green;
             Console.WriteLine($"Event received: {e.Event} on partition {e.PartitionId}.");
+            if (_eventCount++.Equals(0))
+            {
+                _startTime = DateTime.UtcNow;
+            }
+            else if (_eventCount.Equals(_totalNumExpectedEvents))
+            {
+                _elapsedTime = DateTime.UtcNow.Subtract(_startTime).TotalMilliseconds;
+                Console.ForegroundColor = ConsoleColor.Gray;
+                Console.WriteLine($"Elapsed time: {_elapsedTime}ms.");
+            }
         }
     }
 }
