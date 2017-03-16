@@ -1,19 +1,19 @@
-﻿using System;
+﻿#region Includes
+
+using System;
 using System.Configuration;
 
-namespace Daishi.Pluralsight.EventHub.WebTrafficGenerator
-{
-    internal class Program
-    {
-        private static void Main(string[] args)
-        {
+#endregion
+
+namespace Daishi.Pluralsight.EventHub.WebTrafficGenerator {
+    internal static class Program {
+        private static void Main(string[] args) {
             Console.ForegroundColor = ConsoleColor.Cyan;
             Console.WriteLine(@"Press Ctrl-C to stop the sender process");
             Console.WriteLine(@"Press Enter to start now...");
             Console.ReadLine();
 
-            try
-            {
+            try {
                 Console.WriteLine(@"Establishing connection to Event Hub...");
 
                 var eventHubConnectionString =
@@ -39,12 +39,10 @@ namespace Daishi.Pluralsight.EventHub.WebTrafficGenerator
                 Console.WriteLine(@"Press Enter to quit...");
                 Console.ReadLine();
             }
-            catch (Exception exception)
-            {
+            catch (Exception exception) {
                 Console.ForegroundColor = ConsoleColor.Red;
                 Console.WriteLine(exception.Message);
-                if (exception.InnerException != null)
-                {
+                if (exception.InnerException != null) {
                     Console.WriteLine(exception.InnerException.Message);
                 }
                 Console.ReadLine();
@@ -53,8 +51,7 @@ namespace Daishi.Pluralsight.EventHub.WebTrafficGenerator
 
         private static void WebTrafficGenerator_SimulatedHttpRequestPublished(
             object sender,
-            SimulatedHttpRequestPublishedEventArgs e)
-        {
+            SimulatedHttpRequestPublishedEventArgs e) {
             Console.Clear();
             Console.WriteLine(@"Press Ctrl-C to stop the sender process");
             Console.WriteLine();

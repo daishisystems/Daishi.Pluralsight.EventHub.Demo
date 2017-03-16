@@ -1,20 +1,20 @@
-﻿using System;
+﻿#region Includes
+
+using System;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 
-namespace Daishi.Pluralsight.EventHub.Tests
-{
+#endregion
+
+namespace Daishi.Pluralsight.EventHub.Tests {
     [TestClass]
-    public class EventHubToolboxTests
-    {
+    public class EventHubToolboxTests {
         [TestCleanup]
-        public void CleanUp()
-        {
+        public void CleanUp() {
             EventHubToolbox.Instance.UnsubscribeAll(eventProcessorHost => { });
         }
 
         [TestMethod]
-        public void SubscribeCachesEventProcessorHostInstance()
-        {
+        public void SubscribeCachesEventProcessorHostInstance() {
             EventHubToolbox.Instance.Subscribe(
                 "HOSTNAME",
                 "CONNECTIONSTRING",
@@ -25,16 +25,14 @@ namespace Daishi.Pluralsight.EventHub.Tests
                 host => { },
                 (host,
                     factory,
-                    options) =>
-                { },
+                    options) => { },
                 true);
 
             Assert.AreEqual(1, EventHubToolbox.Instance.EventProcessorHosts.Count);
         }
 
         [TestMethod]
-        public void UnSubscribeClearsAllManagedEventProcessorHostInstances()
-        {
+        public void UnSubscribeClearsAllManagedEventProcessorHostInstances() {
             EventHubToolbox.Instance.Subscribe(
                 "HOSTNAME",
                 "CONNECTIONSTRING",
@@ -45,8 +43,7 @@ namespace Daishi.Pluralsight.EventHub.Tests
                 host => { },
                 (host,
                     factory,
-                    options) =>
-                { },
+                    options) => { },
                 true);
 
             EventHubToolbox.Instance.UnsubscribeAll(eventProcessorHost => { });
@@ -54,8 +51,7 @@ namespace Daishi.Pluralsight.EventHub.Tests
         }
 
         [TestMethod]
-        public void UnSubscribeRemovesEventProcessorHost()
-        {
+        public void UnSubscribeRemovesEventProcessorHost() {
             var eventProcessorHostName = "HOSTNAME";
 
             EventHubToolbox.Instance.Subscribe(
@@ -68,8 +64,7 @@ namespace Daishi.Pluralsight.EventHub.Tests
                 host => { },
                 (host,
                     factory,
-                    options) =>
-                { },
+                    options) => { },
                 true);
 
             EventHubToolbox.Instance.UnSubscribe(eventProcessorHostName, host => { });

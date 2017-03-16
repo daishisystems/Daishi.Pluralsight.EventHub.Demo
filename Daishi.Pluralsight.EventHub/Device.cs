@@ -1,14 +1,16 @@
-﻿using System;
+﻿#region Includes
 
-namespace Daishi.Pluralsight.EventHub
-{
+using System;
+
+#endregion
+
+namespace Daishi.Pluralsight.EventHub {
     /// <summary>
     ///     <see cref="Device" /> refers to a physical device, such as a phone, or
     ///     tablet, from which a HTTP request is issued to our simulated web application.
     /// </summary>
     [Flags]
-    public enum Device
-    {
+    public enum Device {
         /// <summary>
         ///     <see cref="Unknown" /> represents a device whose type cannot be determined.
         /// </summary>

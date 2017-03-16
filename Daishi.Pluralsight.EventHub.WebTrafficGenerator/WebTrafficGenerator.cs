@@ -1,16 +1,18 @@
-﻿using System;
+﻿#region Includes
+
+using System;
 using System.Threading.Tasks;
 using Newtonsoft.Json;
 
-namespace Daishi.Pluralsight.EventHub.WebTrafficGenerator
-{
+#endregion
+
+namespace Daishi.Pluralsight.EventHub.WebTrafficGenerator {
     /// <summary>
     ///     <see cref="WebTrafficGenerator" /> instantiates
     ///     <see cref="SimulatedHttpRequest" /> instances, and publishes them to Event
     ///     Hub.
     /// </summary>
-    internal class WebTrafficGenerator
-    {
+    internal sealed class WebTrafficGenerator {
         /// <summary>
         ///     <see cref="SimulatedHttpRequestPublishedEventHandler" /> is a
         ///     function-pointer that facilitates
@@ -44,19 +46,16 @@ namespace Daishi.Pluralsight.EventHub.WebTrafficGenerator
         /// </param>
         public void Generate(
             string eventHubConnectionString,
-            int numSimulatedHttpRequests)
-        {
+            int numSimulatedHttpRequests) {
             EventHubToolbox.Instance.Connect(eventHubConnectionString);
             var random = new Random();
 
-            for (var i = 0; i < numSimulatedHttpRequests; i++)
-            {
+            for (var i = 0; i < numSimulatedHttpRequests; i++) {
                 var webTrafficEvent = SimulatedHttpRequest.GenerateRandom(random);
                 var eventPayload = JsonConvert.SerializeObject(webTrafficEvent);
 
                 EventHubToolbox.Instance.Send(eventPayload);
-                OnSimulatedHttpRequestPublished(new SimulatedHttpRequestPublishedEventArgs
-                {
+                OnSimulatedHttpRequestPublished(new SimulatedHttpRequestPublishedEventArgs {
                     IpAddress = webTrafficEvent.IpAddress,
                     NumSimulatedHttpRequests = i + 1
                 });
@@ -79,13 +78,11 @@ namespace Daishi.Pluralsight.EventHub.WebTrafficGenerator
         /// </param>
         public async Task GenerateAsync(
             string eventHubConnectionString,
-            int numSimulatedHttpRequests)
-        {
+            int numSimulatedHttpRequests) {
             EventHubToolbox.Instance.Connect(eventHubConnectionString);
             var random = new Random();
 
-            for (var i = 0; i < numSimulatedHttpRequests; i++)
-            {
+            for (var i = 0; i < numSimulatedHttpRequests; i++) {
                 var webTrafficEvent = SimulatedHttpRequest.GenerateRandom(random);
                 var eventPayload = JsonConvert.SerializeObject(webTrafficEvent);
 
@@ -104,9 +101,8 @@ namespace Daishi.Pluralsight.EventHub.WebTrafficGenerator
         ///     pertaining to the
         ///     <see cref="WebTrafficGenerator.SimulatedHttpRequestPublished" /> event.
         /// </param>
-        protected virtual void OnSimulatedHttpRequestPublished(
-            SimulatedHttpRequestPublishedEventArgs e)
-        {
+        private void OnSimulatedHttpRequestPublished(
+            SimulatedHttpRequestPublishedEventArgs e) {
             SimulatedHttpRequestPublished?.Invoke(this, e);
         }
     }

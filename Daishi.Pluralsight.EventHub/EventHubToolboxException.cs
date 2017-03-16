@@ -1,7 +1,10 @@
-﻿using System;
+﻿#region Includes
 
-namespace Daishi.Pluralsight.EventHub
-{
+using System;
+
+#endregion
+
+namespace Daishi.Pluralsight.EventHub {
     /// <summary>
     ///     <see cref="EventHubToolboxException" /> augments <see cref="Exception" />
     ///     objects with information specific to the particular
@@ -11,22 +14,15 @@ namespace Daishi.Pluralsight.EventHub
     ///     specific to <see cref="EventHubToolbox" /> functionality.
     /// </summary>
     [Serializable]
-    public class EventHubToolboxException : Exception
-    {
-        public EventHubToolboxException()
-        {
-        }
+    public class EventHubToolboxException : Exception {
+        public EventHubToolboxException() {}
 
         public EventHubToolboxException(string message)
-            : base(message)
-        {
-        }
+            : base(message) {}
 
         public EventHubToolboxException(
             string message,
             Exception inner)
-            : base(message, inner)
-        {
-        }
+            : base(message, inner) {}
     }
 }

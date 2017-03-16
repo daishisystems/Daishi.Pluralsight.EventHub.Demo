@@ -1,4 +1,6 @@
-﻿using System;
+﻿#region Includes
+
+using System;
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.Linq;
@@ -6,14 +8,14 @@ using System.Text;
 using System.Threading.Tasks;
 using Microsoft.ServiceBus.Messaging;
 
-namespace Daishi.Pluralsight.EventHub
-{
+#endregion
+
+namespace Daishi.Pluralsight.EventHub {
     /// <summary>
     ///     <see cref="EventReceiver" /> interfaces with Event Hub, subscribing to, and
     ///     downloading events as they are output.
     /// </summary>
-    public sealed class EventReceiver : IEventProcessor
-    {
+    public sealed class EventReceiver : IEventProcessor {
         /// <summary>
         ///     <see cref="EventReceivedEventHandler" /> is a function pointer that
         ///     facilitates
@@ -40,8 +42,7 @@ namespace Daishi.Pluralsight.EventHub
 
         private Stopwatch _checkpointStopWatch;
 
-        public EventReceiver(TimeSpan checkPointInterval)
-        {
+        public EventReceiver(TimeSpan checkPointInterval) {
             _checkPointInterval = checkPointInterval;
         }
 
@@ -61,14 +62,11 @@ namespace Daishi.Pluralsight.EventHub
         /// <returns><see cref="Task{TResult}" /> (an empty async response).</returns>
         public async Task CloseAsync(
             PartitionContext context,
-            CloseReason reason)
-        {
-            if (reason == CloseReason.Shutdown)
-            {
+            CloseReason reason) {
+            if (reason == CloseReason.Shutdown) {
                 await context.CheckpointAsync();
             }
-            OnNotification(new NotificationReceivedEventArgs
-            {
+            OnNotification(new NotificationReceivedEventArgs {
                 Notificaction = $"Event Hub connection closed: {reason}",
                 NotificationSource = NotificationSource.Close,
                 PartitionId = context.Lease.PartitionId
@@ -84,13 +82,11 @@ namespace Daishi.Pluralsight.EventHub
         ///     <see cref="PartitionContext" /> to which this instance will subscribe.
         /// </param>
         /// <returns><see cref="Task{TResult}" /> (an empty async response).</returns>
-        public Task OpenAsync(PartitionContext context)
-        {
+        public Task OpenAsync(PartitionContext context) {
             _checkpointStopWatch = new Stopwatch();
             _checkpointStopWatch.Start();
 
-            OnNotification(new NotificationReceivedEventArgs
-            {
+            OnNotification(new NotificationReceivedEventArgs {
                 Notificaction = "Event Hub connection established.",
                 NotificationSource = NotificationSource.Open,
                 PartitionId = context.Lease.PartitionId
@@ -119,25 +115,20 @@ namespace Daishi.Pluralsight.EventHub
         ///     events.
         /// </remarks>
         public async Task ProcessEventsAsync(PartitionContext context,
-            IEnumerable<EventData> messages)
-        {
+            IEnumerable<EventData> messages) {
             foreach (var @event in messages
-                .Select(eventData => Encoding.UTF8.GetString(eventData.GetBytes())))
-            {
-                OnEventReceived(new EventReceivedEventArgs
-                {
+                .Select(eventData => Encoding.UTF8.GetString(eventData.GetBytes()))) {
+                OnEventReceived(new EventReceivedEventArgs {
                     Event = @event,
                     PartitionId = context.Lease.PartitionId
                 });
-                OnNotification(new NotificationReceivedEventArgs
-                {
+                OnNotification(new NotificationReceivedEventArgs {
                     Notificaction = "Event received.",
                     NotificationSource = NotificationSource.ProcessEvents,
                     PartitionId = context.Lease.PartitionId
                 });
             }
-            if (_checkpointStopWatch.Elapsed > _checkPointInterval)
-            {
+            if (_checkpointStopWatch.Elapsed > _checkPointInterval) {
                 await context.CheckpointAsync();
                 _checkpointStopWatch.Restart();
             }
@@ -164,8 +155,7 @@ namespace Daishi.Pluralsight.EventHub
         ///     <see cref="e" /> is an <see cref="NotificationReceivedEventArgs" />
         ///     instance containing a notification metadata.
         /// </param>
-        private void OnNotification(NotificationReceivedEventArgs e)
-        {
+        private void OnNotification(NotificationReceivedEventArgs e) {
             NotificationReceived?.Invoke(this, e);
         }
 
@@ -177,8 +167,7 @@ namespace Daishi.Pluralsight.EventHub
         ///     <see cref="e" /> is an <see cref="EventReceivedEventArgs" />
         ///     instance containing event metadata.
         /// </param>
-        private void OnEventReceived(EventReceivedEventArgs e)
-        {
+        private void OnEventReceived(EventReceivedEventArgs e) {
             EventReceived?.Invoke(this, e);
         }
     }

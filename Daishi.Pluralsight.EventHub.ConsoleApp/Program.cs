@@ -1,20 +1,20 @@
-﻿using System;
+﻿#region Includes
+
+using System;
 using System.Collections.Generic;
 using System.Configuration;
 using System.Threading.Tasks;
 using Microsoft.ServiceBus.Messaging;
 
-namespace Daishi.Pluralsight.EventHub.ConsoleApp
-{
-    internal class Program
-    {
-        private static void Main(string[] args)
-        {
+#endregion
+
+namespace Daishi.Pluralsight.EventHub.ConsoleApp {
+    internal static class Program {
+        private static void Main(string[] args) {
             MainAsync().Wait();
         }
 
-        private static async Task MainAsync()
-        {
+        private static async Task MainAsync() {
             Console.ForegroundColor = ConsoleColor.Green;
 
             var eventHubConnectionString =
@@ -22,8 +22,7 @@ namespace Daishi.Pluralsight.EventHub.ConsoleApp
 
             EventHubToolbox.Instance.Connect(eventHubConnectionString);
 
-            if (EventHubToolbox.Instance.IsConnected)
-            {
+            if (EventHubToolbox.Instance.IsConnected) {
                 Console.WriteLine(@"Connected OK!");
             }
 
@@ -57,15 +56,13 @@ namespace Daishi.Pluralsight.EventHub.ConsoleApp
                 false,
                 eventProcessorOptions);
 
-            if (EventHubToolbox.Instance.IsSubscribedToAny)
-            {
+            if (EventHubToolbox.Instance.IsSubscribedToAny) {
                 Console.WriteLine(@"Subscribed!");
             }
 
             await EventHubToolbox.Instance.SendAsync("TEST");
 
-            var events = new List<string>
-            {
+            var events = new List<string> {
                 "Event1",
                 "EVent2"
             };
@@ -81,23 +78,20 @@ namespace Daishi.Pluralsight.EventHub.ConsoleApp
         }
 
         private static void EventReceiver_EventReceived(object sender,
-            EventReceivedEventArgs e)
-        {
+            EventReceivedEventArgs e) {
             Console.WriteLine(@"Event received: {0}", e.Event);
         }
 
         private static void EventReceiver_NotificationReceived(
             object sender,
-            NotificationReceivedEventArgs e)
-        {
+            NotificationReceivedEventArgs e) {
             Console.WriteLine(@"Notification received: {0}\r\nPartition: {1}",
                 e.Notificaction, e.PartitionId);
         }
 
         private static void EventProcessorOptions_ExceptionReceived(
             object sender,
-            ExceptionReceivedEventArgs e)
-        {
+            ExceptionReceivedEventArgs e) {
             Console.ForegroundColor = ConsoleColor.Red;
             Console.WriteLine(e.Exception.Message);
             Console.ForegroundColor = ConsoleColor.Green;

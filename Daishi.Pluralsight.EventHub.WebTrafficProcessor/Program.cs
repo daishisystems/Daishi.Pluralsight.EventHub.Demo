@@ -1,27 +1,27 @@
-﻿using System;
+﻿#region Includes
+
+using System;
 using System.Configuration;
 using Microsoft.ServiceBus.Messaging;
 
-namespace Daishi.Pluralsight.EventHub.WebTrafficProcessor
-{
-    internal class Program
-    {
-        private static volatile int _eventCount;
-        private static DateTime _startTime;
-        private static double _elapsedTime;
-        private static int _totalNumExpectedEvents;
+#endregion
 
-        private static void Main(string[] args)
-        {
-            _totalNumExpectedEvents =
+namespace Daishi.Pluralsight.EventHub.WebTrafficProcessor {
+    internal static class Program {
+        private static volatile int eventCount;
+        private static DateTime startTime;
+        private static double elapsedTime;
+        private static int totalNumExpectedEvents;
+
+        private static void Main(string[] args) {
+            totalNumExpectedEvents =
                 int.Parse(ConfigurationManager.AppSettings["TotalNumExpectedEvents"]);
             Console.ForegroundColor = ConsoleColor.Green;
             Console.WriteLine(@"Press Ctrl-C to stop the processor.");
             Console.WriteLine(@"Press Enter to start now...");
             Console.ReadLine();
 
-            try
-            {
+            try {
                 Console.Write(@"Subscribing to Event Hub...");
 
                 var eventHubConnectionString =
@@ -58,15 +58,12 @@ namespace Daishi.Pluralsight.EventHub.WebTrafficProcessor
 
                 EventHubToolbox.Instance.UnsubscribeAll(EventHubToolbox.UnRegister);
             }
-            catch (Exception exception)
-            {
+            catch (Exception exception) {
                 Console.ForegroundColor = ConsoleColor.Red;
                 Console.WriteLine(exception.Message);
-                if (exception.InnerException != null)
-                {
+                if (exception.InnerException != null) {
                     Console.WriteLine(exception.InnerException.Message);
-                    if (exception.InnerException.InnerException != null)
-                    {
+                    if (exception.InnerException.InnerException != null) {
                         Console.WriteLine(exception.InnerException.InnerException.Message);
                     }
                 }
@@ -76,28 +73,24 @@ namespace Daishi.Pluralsight.EventHub.WebTrafficProcessor
 
         private static void EventReceiver_NotificationReceived(
             object sender,
-            NotificationReceivedEventArgs e)
-        {
+            NotificationReceivedEventArgs e) {
             if (!(e.NotificationSource.HasFlag(NotificationSource.Open) |
                   e.NotificationSource.HasFlag(NotificationSource.Close))) return;
 
             Console.ForegroundColor = ConsoleColor.Yellow;
-            Console.WriteLine($"Notification: {e.Notificaction}");
-            Console.WriteLine($"Partition: {e.PartitionId}");
-            Console.WriteLine($"Source: {e.NotificationSource}");
+            Console.WriteLine($@"Notification: {e.Notificaction}");
+            Console.WriteLine($@"Partition: {e.PartitionId}");
+            Console.WriteLine($@"Source: {e.NotificationSource}");
         }
 
         private static void EventProcessorOptions_ExceptionReceived(
             object sender,
-            ExceptionReceivedEventArgs e)
-        {
+            ExceptionReceivedEventArgs e) {
             Console.ForegroundColor = ConsoleColor.Red;
             Console.WriteLine(e.Exception.Message);
-            if (e.Exception.InnerException != null)
-            {
+            if (e.Exception.InnerException != null) {
                 Console.WriteLine(e.Exception.InnerException.Message);
-                if (e.Exception.InnerException.InnerException != null)
-                {
+                if (e.Exception.InnerException.InnerException != null) {
                     Console.WriteLine(e.Exception.InnerException.InnerException.Message);
                 }
             }
@@ -106,19 +99,16 @@ namespace Daishi.Pluralsight.EventHub.WebTrafficProcessor
 
         private static void EventReceiver_EventReceived(
             object sender,
-            EventReceivedEventArgs e)
-        {
+            EventReceivedEventArgs e) {
             Console.ForegroundColor = ConsoleColor.Green;
-            Console.WriteLine($"Event received: {e.Event} on partition {e.PartitionId}.");
-            if (_eventCount++.Equals(0))
-            {
-                _startTime = DateTime.UtcNow;
+            Console.WriteLine($@"Event received: {e.Event} on partition {e.PartitionId}.");
+            if (eventCount++.Equals(0)) {
+                startTime = DateTime.UtcNow;
             }
-            else if (_eventCount.Equals(_totalNumExpectedEvents))
-            {
-                _elapsedTime = DateTime.UtcNow.Subtract(_startTime).TotalMilliseconds;
+            else if (eventCount.Equals(totalNumExpectedEvents)) {
+                elapsedTime = DateTime.UtcNow.Subtract(startTime).TotalMilliseconds;
                 Console.ForegroundColor = ConsoleColor.Gray;
-                Console.WriteLine($"Elapsed time: {_elapsedTime}ms.");
+                Console.WriteLine($@"Elapsed time: {elapsedTime}ms.");
             }
         }
     }

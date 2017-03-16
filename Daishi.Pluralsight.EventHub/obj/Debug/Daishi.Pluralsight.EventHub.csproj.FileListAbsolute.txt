@@ -119,3 +119,4 @@ C:\projects\Daishi.Pluralsight.EventHub.Demo\Daishi.Pluralsight.EventHub\obj\Deb
 C:\projects\Daishi.Pluralsight.EventHub.Demo\Daishi.Pluralsight.EventHub\obj\Debug\Daishi.Pluralsight.EventHub.csproj.GenerateResource.Cache
 C:\projects\Daishi.Pluralsight.EventHub.Demo\Daishi.Pluralsight.EventHub\obj\Debug\Daishi.Pluralsight.EventHub.dll
 C:\projects\Daishi.Pluralsight.EventHub.Demo\Daishi.Pluralsight.EventHub\obj\Debug\Daishi.Pluralsight.EventHub.pdb
+C:\projects\Daishi.Pluralsight.EventHub.Demo\Daishi.Pluralsight.EventHub\obj\Debug\Daishi.Pluralsight.EventHub.csprojResolveAssemblyReference.cache

@@ -1,38 +1,36 @@
-﻿using System;
+﻿#region Includes
+
+using System;
 using System.Collections.Generic;
 using System.Text;
 using System.Threading.Tasks;
 using Microsoft.ServiceBus.Messaging;
 
-namespace Daishi.Pluralsight.EventHub
-{
+#endregion
+
+namespace Daishi.Pluralsight.EventHub {
     /// <summary>
     ///     <see cref="EventHubToolbox" /> is a collection of functions that provide an
     ///     interface with Event Hub components in Microsoft Azure.
     /// </summary>
-    public class EventHubToolbox
-    {
-        private static readonly Lazy<EventHubToolbox> Lazy =
+    public class EventHubToolbox {
+        private static readonly Lazy<EventHubToolbox> _lazy =
             new Lazy<EventHubToolbox>(() => new EventHubToolbox());
 
         private EventHubClient _eventHubClient;
 
-        private EventHubToolbox()
-        {
+        private EventHubToolbox() {
             EventProcessorHosts = new Dictionary<string, EventProcessorHost>();
         }
 
-        public static EventHubToolbox Instance => Lazy.Value;
+        public static EventHubToolbox Instance => _lazy.Value;
 
         public bool IsSubscribedToAny => EventProcessorHosts != null
                                          && EventProcessorHosts.Count > 0;
 
         public bool IsConnected => _eventHubClient != null && !_eventHubClient.IsClosed;
 
-        public Dictionary<string, EventProcessorHost> EventProcessorHosts
-        {
-            get;
-        }
+        public Dictionary<string, EventProcessorHost> EventProcessorHosts { get; }
 
         /// <summary>
         ///     <see cref="Connect" /> establishes a connection to an Event Hub instance
@@ -50,19 +48,15 @@ namespace Daishi.Pluralsight.EventHub
         ///     <see cref="EventHubToolboxException" /> is thrown when a connection to
         ///     an Event Hub instance cannot be established.
         /// </exception>
-        public void Connect(string connectionString)
-        {
-            if (string.IsNullOrEmpty(connectionString))
-            {
+        public void Connect(string connectionString) {
+            if (string.IsNullOrEmpty(connectionString)) {
                 throw new ArgumentNullException(nameof(connectionString));
             }
-            try
-            {
+            try {
                 _eventHubClient = EventHubClient.CreateFromConnectionString(
                     connectionString);
             }
-            catch (Exception exception)
-            {
+            catch (Exception exception) {
                 throw new EventHubToolboxException(
                     ErrorMessageResources.ConnectionFailed,
                     exception);
@@ -89,25 +83,20 @@ namespace Daishi.Pluralsight.EventHub
         ///     <see cref="EventHubToolboxException" /> is thrown when
         ///     <see cref="@event" /> cannot be published to an Event Hub instance.
         /// </exception>
-        public void Send(string @event)
-        {
-            if (string.IsNullOrEmpty(@event))
-            {
+        public void Send(string @event) {
+            if (string.IsNullOrEmpty(@event)) {
                 throw new ArgumentNullException(nameof(@event));
             }
-            if (_eventHubClient == null || _eventHubClient.IsClosed)
-            {
+            if (_eventHubClient == null || _eventHubClient.IsClosed) {
                 throw new ArgumentException(
                     ErrorMessageResources.Uninitialized,
                     nameof(_eventHubClient));
             }
-            try
-            {
+            try {
                 _eventHubClient.Send(
                     new EventData(Encoding.UTF8.GetBytes(@event)));
             }
-            catch (Exception exception)
-            {
+            catch (Exception exception) {
                 throw new EventHubToolboxException(
                     ErrorMessageResources.UnableToSendEvent,
                     exception);
@@ -135,25 +124,20 @@ namespace Daishi.Pluralsight.EventHub
         ///     <see cref="EventHubToolboxException" /> is thrown when
         ///     <see cref="@event" /> cannot be published to an Event Hub instance.
         /// </exception>
-        public async Task SendAsync(string @event)
-        {
-            if (string.IsNullOrEmpty(@event))
-            {
+        public async Task SendAsync(string @event) {
+            if (string.IsNullOrEmpty(@event)) {
                 throw new ArgumentNullException(nameof(@event));
             }
-            if (_eventHubClient == null || _eventHubClient.IsClosed)
-            {
+            if (_eventHubClient == null || _eventHubClient.IsClosed) {
                 throw new ArgumentException(
                     ErrorMessageResources.Uninitialized,
                     nameof(_eventHubClient));
             }
-            try
-            {
+            try {
                 await _eventHubClient.SendAsync(
                     new EventData(Encoding.UTF8.GetBytes(@event)));
             }
-            catch (Exception exception)
-            {
+            catch (Exception exception) {
                 throw new EventHubToolboxException(
                     ErrorMessageResources.UnableToSendEvent,
                     exception);
@@ -169,29 +153,23 @@ namespace Daishi.Pluralsight.EventHub
         ///     <see cref="events" /> is the event collection to be
         ///     published to the Event Hub.
         /// </param>
-        public void SendBatch(IEnumerable<string> events)
-        {
-            if (events == null)
-            {
+        public void SendBatch(IEnumerable<string> events) {
+            if (events == null) {
                 throw new ArgumentNullException(nameof(events));
             }
-            if (_eventHubClient == null || _eventHubClient.IsClosed)
-            {
+            if (_eventHubClient == null || _eventHubClient.IsClosed) {
                 throw new ArgumentException(
                     ErrorMessageResources.Uninitialized,
                     nameof(_eventHubClient));
             }
-            try
-            {
+            try {
                 var eventDataList = new List<EventData>();
-                foreach (var @event in events)
-                {
+                foreach (var @event in events) {
                     eventDataList.Add(new EventData(Encoding.UTF8.GetBytes(@event)));
                 }
                 _eventHubClient.SendBatch(eventDataList);
             }
-            catch (Exception exception)
-            {
+            catch (Exception exception) {
                 throw new EventHubToolboxException(
                     ErrorMessageResources.UnableToSendEvents,
                     exception);
@@ -208,29 +186,23 @@ namespace Daishi.Pluralsight.EventHub
         ///     <see cref="events" /> is the event collection to be
         ///     published to the Event Hub.
         /// </param>
-        public async Task SendBatchAsync(IEnumerable<string> events)
-        {
-            if (events == null)
-            {
+        public async Task SendBatchAsync(IEnumerable<string> events) {
+            if (events == null) {
                 throw new ArgumentNullException(nameof(events));
             }
-            if (_eventHubClient == null || _eventHubClient.IsClosed)
-            {
+            if (_eventHubClient == null || _eventHubClient.IsClosed) {
                 throw new ArgumentException(
                     ErrorMessageResources.Uninitialized,
                     nameof(_eventHubClient));
             }
-            try
-            {
+            try {
                 var eventDataList = new List<EventData>();
-                foreach (var @event in events)
-                {
+                foreach (var @event in events) {
                     eventDataList.Add(new EventData(Encoding.UTF8.GetBytes(@event)));
                 }
                 await _eventHubClient.SendBatchAsync(eventDataList);
             }
-            catch (Exception exception)
-            {
+            catch (Exception exception) {
                 throw new EventHubToolboxException(
                     ErrorMessageResources.UnableToSendEvents,
                     exception);
@@ -319,42 +291,32 @@ namespace Daishi.Pluralsight.EventHub
                 BridgeEventProcessorFactory,
                 EventProcessorOptions> registerAction,
             bool testMode = false,
-            EventProcessorOptions eventProcessorOptions = null)
-        {
-            if (string.IsNullOrEmpty(hostName))
-            {
+            EventProcessorOptions eventProcessorOptions = null) {
+            if (string.IsNullOrEmpty(hostName)) {
                 throw new ArgumentNullException(nameof(hostName));
             }
-            if (string.IsNullOrEmpty(eventHubConnectionString))
-            {
+            if (string.IsNullOrEmpty(eventHubConnectionString)) {
                 throw new ArgumentNullException(nameof(eventHubConnectionString));
             }
-            if (string.IsNullOrEmpty(eventHubName))
-            {
+            if (string.IsNullOrEmpty(eventHubName)) {
                 throw new ArgumentNullException(nameof(eventHubName));
             }
-            if (string.IsNullOrEmpty(storageAccountName))
-            {
+            if (string.IsNullOrEmpty(storageAccountName)) {
                 throw new ArgumentNullException(nameof(storageAccountName));
             }
-            if (string.IsNullOrEmpty(storageAccountKey))
-            {
+            if (string.IsNullOrEmpty(storageAccountKey)) {
                 throw new ArgumentNullException(nameof(storageAccountKey));
             }
-            if (eventProcessor == null)
-            {
+            if (eventProcessor == null) {
                 throw new ArgumentNullException(nameof(eventProcessor));
             }
-            if (EventProcessorHosts.ContainsKey(hostName))
-            {
+            if (EventProcessorHosts.ContainsKey(hostName)) {
                 EventProcessorHost existingEventProcessorHost = null;
-                try
-                {
+                try {
                     existingEventProcessorHost = EventProcessorHosts[hostName];
                     unRegisterAction(existingEventProcessorHost);
                 }
-                catch (Exception exception)
-                {
+                catch (Exception exception) {
                     var eventHubHostName = existingEventProcessorHost != null
                         ? existingEventProcessorHost.HostName
                         : "Unknown";
@@ -362,15 +324,13 @@ namespace Daishi.Pluralsight.EventHub
                         exception);
                 }
             }
-            try
-            {
+            try {
                 var storageConnectionString =
                     $"DefaultEndpointsProtocol=https;AccountName={storageAccountName}" +
                     $";AccountKey={storageAccountKey}";
 
                 EventProcessorHost eventProcessorHost = null;
-                try
-                {
+                try {
                     eventProcessorHost = new EventProcessorHost(
                         hostName,
                         eventHubName,
@@ -378,10 +338,8 @@ namespace Daishi.Pluralsight.EventHub
                         eventHubConnectionString,
                         storageConnectionString);
                 }
-                catch (Exception)
-                {
-                    if (!testMode)
-                    {
+                catch (Exception) {
+                    if (!testMode) {
                         throw;
                     }
                 }
@@ -390,8 +348,7 @@ namespace Daishi.Pluralsight.EventHub
                 registerAction(eventProcessorHost, factory, eventProcessorOptions);
                 EventProcessorHosts.Add(hostName, eventProcessorHost);
             }
-            catch (Exception exception)
-            {
+            catch (Exception exception) {
                 throw new EventHubToolboxException($"Error subscribing to {eventHubName}.",
                     exception);
             }
@@ -473,42 +430,32 @@ namespace Daishi.Pluralsight.EventHub
                 EventProcessorOptions,
                 Task> registerFunc,
             bool testMode = false,
-            EventProcessorOptions eventProcessorOptions = null)
-        {
-            if (string.IsNullOrEmpty(hostName))
-            {
+            EventProcessorOptions eventProcessorOptions = null) {
+            if (string.IsNullOrEmpty(hostName)) {
                 throw new ArgumentNullException(nameof(hostName));
             }
-            if (string.IsNullOrEmpty(eventHubConnectionString))
-            {
+            if (string.IsNullOrEmpty(eventHubConnectionString)) {
                 throw new ArgumentNullException(nameof(eventHubConnectionString));
             }
-            if (string.IsNullOrEmpty(eventHubName))
-            {
+            if (string.IsNullOrEmpty(eventHubName)) {
                 throw new ArgumentNullException(nameof(eventHubName));
             }
-            if (string.IsNullOrEmpty(storageAccountName))
-            {
+            if (string.IsNullOrEmpty(storageAccountName)) {
                 throw new ArgumentNullException(nameof(storageAccountName));
             }
-            if (string.IsNullOrEmpty(storageAccountKey))
-            {
+            if (string.IsNullOrEmpty(storageAccountKey)) {
                 throw new ArgumentNullException(nameof(storageAccountKey));
             }
-            if (eventProcessor == null)
-            {
+            if (eventProcessor == null) {
                 throw new ArgumentNullException(nameof(eventProcessor));
             }
-            if (EventProcessorHosts.ContainsKey(hostName))
-            {
+            if (EventProcessorHosts.ContainsKey(hostName)) {
                 EventProcessorHost existingEventProcessorHost = null;
-                try
-                {
+                try {
                     existingEventProcessorHost = EventProcessorHosts[hostName];
                     await unRegisterFunc(existingEventProcessorHost);
                 }
-                catch (Exception exception)
-                {
+                catch (Exception exception) {
                     var eventHubHostName = existingEventProcessorHost != null
                         ? existingEventProcessorHost.HostName
                         : "Unknown";
@@ -516,15 +463,13 @@ namespace Daishi.Pluralsight.EventHub
                         exception);
                 }
             }
-            try
-            {
+            try {
                 var storageConnectionString =
                     $"DefaultEndpointsProtocol=https;AccountName={storageAccountName}" +
                     $";AccountKey={storageAccountKey}";
 
                 EventProcessorHost eventProcessorHost = null;
-                try
-                {
+                try {
                     eventProcessorHost = new EventProcessorHost(
                         hostName,
                         eventHubName,
@@ -532,10 +477,8 @@ namespace Daishi.Pluralsight.EventHub
                         eventHubConnectionString,
                         storageConnectionString);
                 }
-                catch (Exception)
-                {
-                    if (!testMode)
-                    {
+                catch (Exception) {
+                    if (!testMode) {
                         throw;
                     }
                 }
@@ -544,8 +487,7 @@ namespace Daishi.Pluralsight.EventHub
                 await registerFunc(eventProcessorHost, factory, eventProcessorOptions);
                 EventProcessorHosts.Add(hostName, eventProcessorHost);
             }
-            catch (Exception exception)
-            {
+            catch (Exception exception) {
                 throw new EventHubToolboxException($"Error subscribing to {eventHubName}.",
                     exception);
             }
@@ -560,27 +502,22 @@ namespace Daishi.Pluralsight.EventHub
         ///     abstracts the <see cref="EventProcessorHost" /> un-register process outside
         ///     of this method, in order to facilitate unit-testing.
         /// </param>
-        public void UnsubscribeAll(Action<EventProcessorHost> unregisterAction)
-        {
+        public void UnsubscribeAll(Action<EventProcessorHost> unregisterAction) {
             if (!IsSubscribedToAny) return;
             var unregisteredHostNames = new List<string>();
 
-            foreach (var hostName in EventProcessorHosts.Keys)
-            {
-                try
-                {
+            foreach (var hostName in EventProcessorHosts.Keys) {
+                try {
                     var eventProcessorHost = EventProcessorHosts[hostName];
                     unregisterAction(eventProcessorHost);
                     unregisteredHostNames.Add(hostName);
                 }
-                catch (Exception exception)
-                {
+                catch (Exception exception) {
                     throw new EventHubToolboxException(
                         $"Unable to un-subscribe from {hostName}.", exception);
                 }
             }
-            foreach (var hostName in unregisteredHostNames)
-            {
+            foreach (var hostName in unregisteredHostNames) {
                 EventProcessorHosts.Remove(hostName);
             }
         }
@@ -594,27 +531,21 @@ namespace Daishi.Pluralsight.EventHub
         ///     abstracts the <see cref="EventProcessorHost" /> un-register process outside
         ///     of this method, in order to facilitate unit-testing.
         /// </param>
-        public async Task UnsubscribeAllAsync(Func<EventProcessorHost, Task> unregisterFunc)
-        {
-            if (IsSubscribedToAny)
-            {
+        public async Task UnsubscribeAllAsync(Func<EventProcessorHost, Task> unregisterFunc) {
+            if (IsSubscribedToAny) {
                 var unregisteredHostNames = new List<string>();
-                foreach (var hostName in EventProcessorHosts.Keys)
-                {
-                    try
-                    {
+                foreach (var hostName in EventProcessorHosts.Keys) {
+                    try {
                         var eventProcessorHost = EventProcessorHosts[hostName];
                         await unregisterFunc(eventProcessorHost);
                         unregisteredHostNames.Add(hostName);
                     }
-                    catch (Exception exception)
-                    {
+                    catch (Exception exception) {
                         throw new EventHubToolboxException(
                             $"Unable to un-subscribe from {hostName}.", exception);
                     }
                 }
-                foreach (var hostName in unregisteredHostNames)
-                {
+                foreach (var hostName in unregisteredHostNames) {
                     EventProcessorHosts.Remove(hostName);
                 }
             }
@@ -639,29 +570,24 @@ namespace Daishi.Pluralsight.EventHub
         /// <exception cref="EventHubToolboxException"></exception>
         public void UnSubscribe(
             string eventProcessorHostName,
-            Action<EventProcessorHost> unregisterAction)
-        {
-            if (string.IsNullOrEmpty(eventProcessorHostName))
-            {
+            Action<EventProcessorHost> unregisterAction) {
+            if (string.IsNullOrEmpty(eventProcessorHostName)) {
                 throw new ArgumentNullException(nameof(eventProcessorHostName));
             }
-            try
-            {
+            try {
                 EventProcessorHost eventProcessorHost;
                 var isSubscribed = EventProcessorHosts.TryGetValue(
                     eventProcessorHostName,
                     out eventProcessorHost);
 
-                if (!isSubscribed)
-                {
+                if (!isSubscribed) {
                     throw new EventHubToolboxException(
                         $"No subscription to {eventProcessorHostName} exists.");
                 }
                 unregisterAction(eventProcessorHost);
                 EventProcessorHosts.Remove(eventProcessorHostName);
             }
-            catch (Exception exception)
-            {
+            catch (Exception exception) {
                 throw new EventHubToolboxException(
                     $"Unable to un-subscribe from {eventProcessorHostName}.", exception);
             }
@@ -686,29 +612,24 @@ namespace Daishi.Pluralsight.EventHub
         /// <exception cref="EventHubToolboxException"></exception>
         public async Task UnSubscribeAsync(
             string eventProcessorHostName,
-            Func<EventProcessorHost, Task> unregisterFunc)
-        {
-            if (string.IsNullOrEmpty(eventProcessorHostName))
-            {
+            Func<EventProcessorHost, Task> unregisterFunc) {
+            if (string.IsNullOrEmpty(eventProcessorHostName)) {
                 throw new ArgumentNullException(nameof(eventProcessorHostName));
             }
-            try
-            {
+            try {
                 EventProcessorHost eventProcessorHost;
                 var isSubscribed = EventProcessorHosts.TryGetValue(
                     eventProcessorHostName,
                     out eventProcessorHost);
 
-                if (!isSubscribed)
-                {
+                if (!isSubscribed) {
                     throw new EventHubToolboxException(
                         $"No subscription to {eventProcessorHostName} exists.");
                 }
                 await unregisterFunc(eventProcessorHost);
                 EventProcessorHosts.Remove(eventProcessorHostName);
             }
-            catch (Exception exception)
-            {
+            catch (Exception exception) {
                 throw new EventHubToolboxException(
                     $"Unable to un-subscribe from {eventProcessorHostName}.", exception);
             }
@@ -726,10 +647,8 @@ namespace Daishi.Pluralsight.EventHub
         ///     Returns <c>true</c> if <see cref="hostName" /> is currently
         ///     subscribed-to.
         /// </returns>
-        public bool IsSubscribedTo(string hostName)
-        {
-            if (string.IsNullOrEmpty(hostName))
-            {
+        public bool IsSubscribedTo(string hostName) {
+            if (string.IsNullOrEmpty(hostName)) {
                 throw new ArgumentNullException(nameof(hostName));
             }
             return EventProcessorHosts != null
@@ -757,15 +676,12 @@ namespace Daishi.Pluralsight.EventHub
         public static void Register(
             EventProcessorHost eventProcessorHost,
             BridgeEventProcessorFactory bridgeEventProcessorFactory,
-            EventProcessorOptions eventProcessorOptions = null)
-        {
-            if (eventProcessorOptions == null)
-            {
+            EventProcessorOptions eventProcessorOptions = null) {
+            if (eventProcessorOptions == null) {
                 eventProcessorHost.RegisterEventProcessorFactoryAsync(
                     bridgeEventProcessorFactory).Wait();
             }
-            else
-            {
+            else {
                 eventProcessorHost.RegisterEventProcessorFactoryAsync(
                     bridgeEventProcessorFactory,
                     eventProcessorOptions).Wait();
@@ -793,15 +709,12 @@ namespace Daishi.Pluralsight.EventHub
         public static async Task RegisterAsync(
             EventProcessorHost eventProcessorHost,
             BridgeEventProcessorFactory bridgeEventProcessorFactory,
-            EventProcessorOptions eventProcessorOptions = null)
-        {
-            if (eventProcessorOptions == null)
-            {
+            EventProcessorOptions eventProcessorOptions = null) {
+            if (eventProcessorOptions == null) {
                 await eventProcessorHost.RegisterEventProcessorFactoryAsync(
                     bridgeEventProcessorFactory);
             }
-            else
-            {
+            else {
                 await eventProcessorHost.RegisterEventProcessorFactoryAsync(
                     bridgeEventProcessorFactory,
                     eventProcessorOptions);
@@ -818,8 +731,7 @@ namespace Daishi.Pluralsight.EventHub
         ///     <see cref="EventProcessorHost" /> instance to be un-registered.
         /// </param>
         /// <remarks>This is a helper function, designed to facilitate unit-testing.</remarks>
-        public static void UnRegister(EventProcessorHost eventProcessorHost)
-        {
+        public static void UnRegister(EventProcessorHost eventProcessorHost) {
             eventProcessorHost.UnregisterEventProcessorAsync().Wait();
         }
 
@@ -834,8 +746,7 @@ namespace Daishi.Pluralsight.EventHub
         ///     <see cref="EventProcessorHost" /> instance to be un-registered.
         /// </param>
         /// <remarks>This is a helper function, designed to facilitate unit-testing.</remarks>
-        public static async Task UnRegisterAsync(EventProcessorHost eventProcessorHost)
-        {
+        public static async Task UnRegisterAsync(EventProcessorHost eventProcessorHost) {
             await eventProcessorHost.UnregisterEventProcessorAsync();
         }
     }
