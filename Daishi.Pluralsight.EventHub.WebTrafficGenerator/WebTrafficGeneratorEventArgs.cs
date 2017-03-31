@@ -13,13 +13,13 @@ namespace Daishi.Pluralsight.EventHub.WebTrafficGenerator {
     internal class SimulatedHttpRequestPublishedEventArgs : EventArgs {
         /// <summary>
         ///     <see cref="NumSimulatedHttpRequests" /> is the current count of
-        ///     <see cref="SimulatedHttpRequest" /> instances that have been instantiated.
+        ///     <see cref="DeviceTelemetry" /> instances that have been instantiated.
         /// </summary>
         public int NumSimulatedHttpRequests { get; set; }
 
         /// <summary>
         ///     <see cref="IpAddress" /> is the IP address pertaining to the latest
-        ///     instantiated <see cref="SimulatedHttpRequest" />.
+        ///     instantiated <see cref="DeviceTelemetry" />.
         /// </summary>
         public string IpAddress { get; set; }
     }

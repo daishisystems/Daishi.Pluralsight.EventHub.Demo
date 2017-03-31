@@ -9,7 +9,7 @@ using Newtonsoft.Json;
 namespace Daishi.Pluralsight.EventHub.WebTrafficGenerator {
     /// <summary>
     ///     <see cref="WebTrafficGenerator" /> instantiates
-    ///     <see cref="SimulatedHttpRequest" /> instances, and publishes them to Event
+    ///     <see cref="DeviceTelemetry" /> instances, and publishes them to Event
     ///     Hub.
     /// </summary>
     internal sealed class WebTrafficGenerator {
@@ -26,13 +26,13 @@ namespace Daishi.Pluralsight.EventHub.WebTrafficGenerator {
 
         /// <summary>
         ///     <see cref="SimulatedHttpRequestPublished" /> is raised when a
-        ///     <see cref="SimulatedHttpRequest" /> is published to Event Hub.
+        ///     <see cref="DeviceTelemetry" /> is published to Event Hub.
         /// </summary>
         public event SimulatedHttpRequestPublishedEventHandler SimulatedHttpRequestPublished;
 
         /// <summary>
         ///     <see cref="Generate" /> instantiates
-        ///     <see cref="numSimulatedHttpRequests" /> <see cref="SimulatedHttpRequest" />
+        ///     <see cref="numSimulatedHttpRequests" /> <see cref="DeviceTelemetry" />
         ///     instances, and subsequently publishes them to Event Hub.
         /// </summary>
         /// <param name="eventHubConnectionString">
@@ -41,7 +41,7 @@ namespace Daishi.Pluralsight.EventHub.WebTrafficGenerator {
         /// </param>
         /// <param name="numSimulatedHttpRequests">
         ///     <see cref="numSimulatedHttpRequests" />
-        ///     is the number of <see cref="SimulatedHttpRequest" /> instances to
+        ///     is the number of <see cref="DeviceTelemetry" /> instances to
         ///     instantiate and publish to Event Hub.
         /// </param>
         public void Generate(
@@ -51,7 +51,7 @@ namespace Daishi.Pluralsight.EventHub.WebTrafficGenerator {
             var random = new Random();
 
             for (var i = 0; i < numSimulatedHttpRequests; i++) {
-                var webTrafficEvent = SimulatedHttpRequest.GenerateRandom(random);
+                var webTrafficEvent = DeviceTelemetry.GenerateRandom(random);
                 var eventPayload = JsonConvert.SerializeObject(webTrafficEvent);
 
                 EventHubToolbox.Instance.Send(eventPayload);
@@ -64,7 +64,7 @@ namespace Daishi.Pluralsight.EventHub.WebTrafficGenerator {
 
         /// <summary>
         ///     <see cref="GenerateAsync" /> asynchronously instantiates
-        ///     <see cref="numSimulatedHttpRequests" /> <see cref="SimulatedHttpRequest" />
+        ///     <see cref="numSimulatedHttpRequests" /> <see cref="DeviceTelemetry" />
         ///     instances, and subsequently publishes them to Event Hub.
         /// </summary>
         /// <param name="eventHubConnectionString">
@@ -73,7 +73,7 @@ namespace Daishi.Pluralsight.EventHub.WebTrafficGenerator {
         /// </param>
         /// <param name="numSimulatedHttpRequests">
         ///     <see cref="numSimulatedHttpRequests" />
-        ///     is the number of <see cref="SimulatedHttpRequest" /> instances to
+        ///     is the number of <see cref="DeviceTelemetry" /> instances to
         ///     instantiate and publish to Event Hub.
         /// </param>
         public async Task GenerateAsync(
@@ -83,7 +83,7 @@ namespace Daishi.Pluralsight.EventHub.WebTrafficGenerator {
             var random = new Random();
 
             for (var i = 0; i < numSimulatedHttpRequests; i++) {
-                var webTrafficEvent = SimulatedHttpRequest.GenerateRandom(random);
+                var webTrafficEvent = DeviceTelemetry.GenerateRandom(random);
                 var eventPayload = JsonConvert.SerializeObject(webTrafficEvent);
 
                 await EventHubToolbox.Instance.SendAsync(eventPayload);
