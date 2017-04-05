@@ -23,10 +23,10 @@ namespace Daishi.Pluralsight.EventHub {
         public DateTime Time { get; set; }
 
         /// <summary>
-        ///     <see cref="Device" /> represents the physical device type from which an
+        ///     <see cref="DeviceType" /> represents the physical device type from which an
         ///     up-stream HTTP request originated.
         /// </summary>
-        public DeviceType Device { get; set; }
+        public DeviceType DeviceType { get; set; }
 
         /// <summary>
         /// <see cref="IsOn"/> represents a value that indicates whether or not the 
