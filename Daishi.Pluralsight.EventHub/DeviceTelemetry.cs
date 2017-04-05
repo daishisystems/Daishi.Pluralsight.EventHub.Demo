@@ -37,7 +37,7 @@ namespace Daishi.Pluralsight.EventHub {
         /// <summary>Returns a <see cref="string" /> that represents the current instance.</summary>
         /// <returns>A <see cref="string" /> instance that represents the current instance.</returns>
         public override string ToString() {
-            return $"{Device}: {IpAddress}";
+            return $"{DeviceType}: {IpAddress}";
         }
 
         /// <summary>
@@ -52,7 +52,7 @@ namespace Daishi.Pluralsight.EventHub {
         public static DeviceTelemetry GenerateRandom(Random random) {
             return new DeviceTelemetry {
                 IpAddress = GenerateRandomIpAddress(random),
-                Device = GenerateRandomDevice(random),
+                DeviceType = GenerateRandomDevice(random),
                 Time = DateTime.UtcNow
             };
         }
